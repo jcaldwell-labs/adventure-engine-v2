@@ -214,7 +214,7 @@
 
 ## Repository Status
 
-**GitHub**: https://github.com/jcaldwell1066/adventure-engine-v2
+**GitHub**: https://github.com/jcaldwell-labs/adventure-engine-v2
 **Branch**: master
 **Commit**: f808da4 "feat: Adventure Engine v2.0 MVP"
 **Status**: Public, pushed successfully
