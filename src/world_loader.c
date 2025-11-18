@@ -3,6 +3,8 @@
  * Parses .world files and creates World structures
  */
 
+#define _POSIX_C_SOURCE 200809L
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,7 +13,7 @@
 
 #define MAX_LINE 1024
 
-// Helper: Trim whitespace
+// Helper: Trim whitespace (modifies string in place)
 static char* trim(char *str) {
     while (isspace(*str)) str++;
     if (*str == 0) return str;
@@ -24,8 +26,8 @@ static char* trim(char *str) {
 }
 
 // Helper: Check if line is comment or empty
-static bool is_empty_or_comment(const char *line) {
-    const char *trimmed = trim((char*)line);
+static bool is_empty_or_comment(char *line) {
+    char *trimmed = trim(line);
     return trimmed[0] == '\0' || trimmed[0] == '#';
 }
 
@@ -81,8 +83,9 @@ static bool parse_property(const char *line, char *key, char *value) {
         memmove(key, key_trimmed, strlen(key_trimmed) + 1);
     }
 
-    // Extract value
-    strcpy(value, colon + 1);
+    // Extract value (limit to 511 chars to ensure null-termination)
+    strncpy(value, colon + 1, 511);
+    value[511] = '\0';
     char *value_trimmed = trim(value);
     if (value_trimmed != value) {
         memmove(value, value_trimmed, strlen(value_trimmed) + 1);
@@ -105,7 +108,8 @@ static void parse_exits(World *world, int room_idx, const char *exits_str) {
     strncpy(buffer, exits_str, sizeof(buffer) - 1);
     buffer[sizeof(buffer) - 1] = '\0';
 
-    char *token = strtok(buffer, ",");
+    char *saveptr;
+    char *token = strtok_r(buffer, ",", &saveptr);
     while (token) {
         token = trim(token);
 
@@ -120,11 +124,17 @@ static void parse_exits(World *world, int room_idx, const char *exits_str) {
                 int target_room = world_find_room(world, room_id);
                 if (target_room != -1) {
                     world_connect_rooms(world, room_idx, dir, target_room);
+                } else {
+                    fprintf(stderr, "Warning: Room '%s' has invalid exit '%s' to non-existent room '%s'\n",
+                            world->rooms[room_idx].id, dir_str, room_id);
                 }
+            } else {
+                fprintf(stderr, "Warning: Room '%s' has invalid direction '%s'\n",
+                        world->rooms[room_idx].id, dir_str);
             }
         }
 
-        token = strtok(NULL, ",");
+        token = strtok_r(NULL, ",", &saveptr);
     }
 }
 
@@ -240,8 +250,10 @@ bool world_load_from_file(World *world, const char *filename, LoadError *error) 
                 return false;
             }
 
-            strcpy(current_section, section_type);
-            strcpy(current_id, section_id);
+            strncpy(current_section, section_type, sizeof(current_section) - 1);
+            current_section[sizeof(current_section) - 1] = '\0';
+            strncpy(current_id, section_id, sizeof(current_id) - 1);
+            current_id[sizeof(current_id) - 1] = '\0';
 
             // Reset properties
             prop_name[0] = '\0';

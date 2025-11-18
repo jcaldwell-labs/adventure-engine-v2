@@ -89,8 +89,6 @@ Defines an item. Can appear multiple times.
 - `description` - Full description shown with "examine" (required, max 256 chars)
 - `takeable` - Can be picked up? (required: yes/no/true/false/1/0)
 - `location` - Room ID where item starts (required)
-- `usable` - Can be used? (optional: yes/no, default: no)
-- `use_message` - Message shown when used (optional)
 
 **Example:**
 ```

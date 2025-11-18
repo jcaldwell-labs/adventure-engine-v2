@@ -2,6 +2,8 @@
  * Adventure Engine - Save/Load System Implementation
  */
 
+#define _POSIX_C_SOURCE 200809L
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -209,13 +211,14 @@ bool game_load(World *world, const char *slot_name, char *world_name, size_t wor
                             if (colon && colon[1] != '\0') {
                                 char *items = colon + 1;
                                 int item_slot = 0;
-                                char *token = strtok(items, ",");
+                                char *saveptr;
+                                char *token = strtok_r(items, ",", &saveptr);
                                 while (token && item_slot < MAX_ITEMS) {
                                     int item_id;
                                     if (sscanf(token, "%d", &item_id) == 1) {
                                         room_items[room_idx][item_slot++] = item_id;
                                     }
-                                    token = strtok(NULL, ",");
+                                    token = strtok_r(NULL, ",", &saveptr);
                                 }
                             }
                         }

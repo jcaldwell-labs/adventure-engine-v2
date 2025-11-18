@@ -87,6 +87,7 @@ int main(int argc, char *argv[]) {
 
     // Load world from command line or prompt
     char world_file[256] = "";
+    bool loaded_from_save = false;
 
     if (argc > 1) {
         strncpy(world_file, argv[1], sizeof(world_file) - 1);
@@ -123,8 +124,8 @@ int main(int argc, char *argv[]) {
                     st_add_output("", ST_CTX_NORMAL);
                     st_add_output("Game loaded successfully!", ST_CTX_SPECIAL);
                     strncpy(g_world_name, loaded_world, sizeof(g_world_name) - 1);
+                    loaded_from_save = true;
                     free(input);
-                    goto game_loaded;
                 } else {
                     st_add_output("", ST_CTX_NORMAL);
                     st_add_output("Failed to load save. Starting new game.", ST_CTX_NORMAL);
@@ -136,42 +137,46 @@ int main(int argc, char *argv[]) {
                         st_cleanup();
                         return 0;
                     }
+                    strncpy(world_file, input, sizeof(world_file) - 1);
+                    free(input);
                 }
             }
+        } else {
+            strncpy(world_file, input, sizeof(world_file) - 1);
+            free(input);
+        }
+    }
+
+    // Load world from file if not loaded from save
+    if (!loaded_from_save) {
+        // Map number to world name
+        if (strcmp(world_file, "1") == 0) strcpy(world_file, "dark_tower");
+        else if (strcmp(world_file, "2") == 0) strcpy(world_file, "haunted_mansion");
+        else if (strcmp(world_file, "3") == 0) strcpy(world_file, "crystal_caverns");
+        else if (strcmp(world_file, "4") == 0) strcpy(world_file, "sky_pirates");
+
+        // Build full path
+        char full_path[512];
+        snprintf(full_path, sizeof(full_path), "worlds/%s.world", world_file);
+
+        // Load world
+        LoadError error;
+        if (!world_load_from_file(&world, full_path, &error)) {
+            st_add_output("", ST_CTX_NORMAL);
+            st_add_output("ERROR: Failed to load world file!", ST_CTX_NORMAL);
+            st_add_output(world_loader_get_error(&error), ST_CTX_NORMAL);
+            st_add_output("", ST_CTX_NORMAL);
+            st_render();
+            st_cleanup();
+            return 1;
         }
 
-        strncpy(world_file, input, sizeof(world_file) - 1);
-        free(input);
+        strncpy(g_world_name, world_file, sizeof(g_world_name) - 1);
+
+        st_add_output("", ST_CTX_NORMAL);
+        st_add_output("World loaded successfully!", ST_CTX_SPECIAL);
     }
 
-    // Map number to world name
-    if (strcmp(world_file, "1") == 0) strcpy(world_file, "dark_tower");
-    else if (strcmp(world_file, "2") == 0) strcpy(world_file, "haunted_mansion");
-    else if (strcmp(world_file, "3") == 0) strcpy(world_file, "crystal_caverns");
-    else if (strcmp(world_file, "4") == 0) strcpy(world_file, "sky_pirates");
-
-    // Build full path
-    char full_path[512];
-    snprintf(full_path, sizeof(full_path), "worlds/%s.world", world_file);
-
-    // Load world
-    LoadError error;
-    if (!world_load_from_file(&world, full_path, &error)) {
-        st_add_output("", ST_CTX_NORMAL);
-        st_add_output("ERROR: Failed to load world file!", ST_CTX_NORMAL);
-        st_add_output(world_loader_get_error(&error), ST_CTX_NORMAL);
-        st_add_output("", ST_CTX_NORMAL);
-        st_render();
-        st_cleanup();
-        return 1;
-    }
-
-    strncpy(g_world_name, world_file, sizeof(g_world_name) - 1);
-
-    st_add_output("", ST_CTX_NORMAL);
-    st_add_output("World loaded successfully!", ST_CTX_SPECIAL);
-
-game_loaded:
     st_add_output("", ST_CTX_NORMAL);
 
     // Show initial room
