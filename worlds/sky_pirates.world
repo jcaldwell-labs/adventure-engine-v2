@@ -1,0 +1,102 @@
+# The Sky Pirates - An adventure in the clouds
+
+[WORLD]
+name: The Sky Pirates
+author: Adventure Engine Team
+version: 1.0
+start: deck
+
+[ROOM:deck]
+name: Main Deck
+description: You stand on the wooden deck of a massive airship floating among the clouds. The wind whips around you. Rigging and sails tower above. A hatch leads down into the ship, and stairs lead up to the helm. The cargo hold is forward to the north, and the captain's quarters are aft to the south.
+exits: down=crew_quarters, up=helm, north=cargo, south=captains
+
+[ROOM:helm]
+name: Ship's Helm
+description: The ship's wheel stands before you, made of polished brass and dark wood. From here you can see for miles across the cloud sea. Navigation charts are spread on a nearby table. Stairs lead down to the main deck.
+exits: down=deck
+
+[ROOM:crew_quarters]
+name: Crew Quarters
+description: Hammocks swing gently with the ship's motion. Sea chests are scattered around. The smell of unwashed sailors lingers. A ladder leads up to the deck, and a door to the east leads to the galley.
+exits: up=deck, east=galley
+
+[ROOM:galley]
+name: Ship's Galley
+description: The galley kitchen is cramped but functional. Pots and pans hang from hooks. A stove is bolted to the floor. The smell of stale bread and salted meat fills the air. West returns to crew quarters.
+exits: west=crew_quarters
+
+[ROOM:cargo]
+name: Cargo Hold
+description: Crates and barrels are stacked floor to ceiling. You can hear something scurrying behind the cargo. Rope and tackle hang from the walls. A ladder leads up, and the main deck is to the south.
+exits: south=deck, up=crows_nest
+
+[ROOM:captains]
+name: Captain's Quarters
+description: A luxurious cabin with maps covering the walls. A large desk holds navigation instruments. Through the windows, you see endless clouds. A locked chest sits in the corner. North returns to the main deck.
+exits: north=deck
+
+[ROOM:crows_nest]
+name: Crow's Nest
+description: You've climbed to the highest point on the ship. The view is breathtaking - clouds stretch to the horizon in all directions. You can see other airships in the distance. A telescope is mounted here. Down leads to the cargo hold.
+exits: down=cargo
+
+[ITEM:spyglass]
+name: brass spyglass
+description: A collapsible brass telescope. When you look through it, you can see other airships and sky islands far in the distance. An essential tool for any sky sailor.
+takeable: yes
+location: helm
+
+[ITEM:cutlass]
+name: pirate cutlass
+description: A curved sword with a basket hilt. The blade is sharp and well-maintained. Scratches along the blade tell of many battles. Perfect for repelling boarders.
+takeable: yes
+location: crew_quarters
+
+[ITEM:compass]
+name: sky compass
+description: An ornate compass that points not north, but to the nearest sky island. The needle glows with a faint blue light. Without this, you'd be lost in the clouds forever.
+takeable: yes
+location: helm
+
+[ITEM:rum]
+name: bottle of rum
+description: A dark glass bottle filled with strong rum. The label shows a skull and crossbones. Pirates swear it makes you braver in battle.
+takeable: yes
+location: galley
+
+[ITEM:map]
+name: treasure map
+description: A weathered map showing the location of a legendary sky island where ancient treasure is hidden. X marks the spot, naturally.
+takeable: yes
+location: captains
+
+[ITEM:parrot]
+name: colorful parrot
+description: A brilliant blue and gold parrot perched on a stand. It squawks 'Pieces of eight!' and other pirate phrases. It seems friendly but you can't take it with you.
+takeable: no
+location: captains
+
+[ITEM:chest]
+name: locked chest
+description: A heavy iron-bound chest with a complex lock. It's too heavy to carry, but you can hear coins jingling inside when the ship rocks.
+takeable: no
+location: captains
+
+[ITEM:rope]
+name: coil of rope
+description: A long coil of sturdy ship's rope. Could be useful for tying things down, making repairs, or perhaps escaping in an emergency.
+takeable: yes
+location: cargo
+
+[ITEM:cannon]
+name: deck cannon
+description: A small brass cannon mounted on a wheeled carriage. It's loaded and ready to fire, but far too heavy to carry. You could probably use it if you needed to.
+takeable: no
+location: deck
+
+[ITEM:flag]
+name: jolly roger
+description: The ship's flag - a black background with white skull and crossed cutlasses. It strikes fear into the hearts of merchant vessels. It's flying proudly from the mast and you can't reach it.
+takeable: no
+location: crows_nest

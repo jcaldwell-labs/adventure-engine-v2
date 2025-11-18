@@ -1,0 +1,127 @@
+# The Crystal Caverns - An exploration adventure
+
+[WORLD]
+name: The Crystal Caverns
+author: Adventure Engine Team
+version: 1.0
+start: entrance
+
+[ROOM:entrance]
+name: Cavern Entrance
+description: You stand at the mouth of a vast cave system. Sunlight filters in from behind you, illuminating glittering crystal formations. A narrow passage leads north into darkness. To the east, you hear the sound of running water.
+exits: north=main_hall, east=underground_river
+
+[ROOM:main_hall]
+name: Crystal Hall
+description: A massive underground chamber. Thousands of crystals grow from the walls and ceiling, glowing with soft bioluminescent light. Passages lead in all directions. South returns to the entrance, north continues deeper, east leads to a glowing chamber, and west descends into darkness.
+exits: south=entrance, north=deep_cavern, east=glow_chamber, west=dark_tunnel
+
+[ROOM:underground_river]
+name: Underground River
+description: A swift underground river flows through a narrow channel. The water is crystal clear and ice cold. You can see strange blind fish swimming below. The entrance is to the west, and a ledge leads north.
+exits: west=entrance, north=waterfall
+
+[ROOM:glow_chamber]
+name: Luminescent Chamber
+description: This chamber glows with an otherworldly blue light from bioluminescent fungi covering every surface. The air is thick with spores that sparkle as they float. A passage west returns to the main hall, and a crack in the wall leads south.
+exits: west=main_hall, south=fungi_grove
+
+[ROOM:dark_tunnel]
+name: Dark Tunnel
+description: Absolute darkness surrounds you. You can barely make out shapes even with your light. The tunnel slopes downward. East returns to the hall, and the tunnel continues north.
+exits: east=main_hall, north=abyss
+
+[ROOM:deep_cavern]
+name: Deep Cavern
+description: You've descended deep into the earth. The air is warm here, and you can hear distant rumbling. Massive crystal formations tower above you like trees. South returns to the hall, and a narrow passage leads east.
+exits: south=main_hall, east=crystal_forest
+
+[ROOM:waterfall]
+name: Underground Waterfall
+description: A spectacular waterfall cascades from high above, crashing into a deep pool. The mist creates rainbows in your light. Behind the waterfall, you can see a hidden passage. South returns to the river.
+exits: south=underground_river, west=secret_grotto
+
+[ROOM:fungi_grove]
+name: Fungal Grove
+description: A grove of giant mushrooms, some taller than you. They pulse with gentle light. The air smells earthy and slightly sweet. North returns to the glowing chamber.
+exits: north=glow_chamber
+
+[ROOM:abyss]
+name: Edge of the Abyss
+description: You stand at the edge of a vast chasm. You can't see the bottom. A stone bridge leads east across the gap. South returns to the tunnel.
+exits: south=dark_tunnel, east=far_side
+
+[ROOM:crystal_forest]
+name: Crystal Forest
+description: Giant crystal spires reach from floor to ceiling, creating a forest of glass. Light refracts in dazzling patterns. West returns to the deep cavern.
+exits: west=deep_cavern
+
+[ROOM:secret_grotto]
+name: Secret Grotto
+description: A hidden chamber behind the waterfall. Ancient carvings cover the walls. This place feels sacred. A treasure chest sits on a stone pedestal in the center. East returns to the waterfall.
+exits: east=waterfall
+
+[ROOM:far_side]
+name: Far Side of Abyss
+description: You've crossed the stone bridge. The cavern opens up into a cathedral-sized space. At the center is a massive crystal formation that seems to pulse with inner light. West returns across the bridge.
+exits: west=abyss
+
+[ITEM:lantern]
+name: crystal lantern
+description: A lantern made from a hollowed crystal that glows with its own internal light. It never seems to dim. Perfect for exploring dark places.
+takeable: yes
+location: entrance
+
+[ITEM:rope]
+name: coil of rope
+description: A sturdy rope about 50 feet long. Could be useful for climbing or crossing gaps.
+takeable: yes
+location: main_hall
+
+[ITEM:pickaxe]
+name: mining pickaxe
+description: An old but serviceable pickaxe. The head is chipped but still sharp. Could be used to break crystals or dig.
+takeable: yes
+location: deep_cavern
+
+[ITEM:crystal_blue]
+name: blue crystal
+description: A perfect blue crystal the size of your fist. It glows with inner light and feels warm to the touch. Incredibly valuable.
+takeable: yes
+location: glow_chamber
+
+[ITEM:crystal_red]
+name: red crystal
+description: A crimson crystal that pulses like a heartbeat. It feels alive somehow. Ancient texts speak of these as holding great power.
+takeable: yes
+location: crystal_forest
+
+[ITEM:mushroom]
+name: glowing mushroom
+description: A bioluminescent mushroom. It continues to glow even after being picked. Might be useful as a light source or ingredient.
+takeable: yes
+location: fungi_grove
+
+[ITEM:map]
+name: cave map
+description: An old map of the cavern system, drawn on animal hide. Some passages are marked with warning symbols.
+takeable: yes
+location: waterfall
+
+[ITEM:statue]
+name: stone statue
+description: An ancient statue carved from a single piece of dark stone. It depicts a figure holding a crystal to the sky. Far too heavy to move.
+takeable: no
+location: secret_grotto
+
+[ITEM:chest]
+name: treasure chest
+description: An ornate chest bound with silver. The lock has long since rusted away. Inside you can see gold coins and gems glittering in your light.
+takeable: no
+location: secret_grotto
+
+[ITEM:crystal_heart]
+name: crystal heart
+description: The legendary Crystal Heart, a massive perfect gem that pulses with all the colors of the rainbow. It's said to be the source of all crystals in the caverns.
+takeable: yes
+location: far_side

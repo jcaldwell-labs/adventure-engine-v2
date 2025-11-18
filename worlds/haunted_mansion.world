@@ -1,0 +1,84 @@
+# The Haunted Mansion - A horror-themed adventure
+
+[WORLD]
+name: The Haunted Mansion
+author: Adventure Engine Team
+version: 1.0
+start: foyer
+
+[ROOM:foyer]
+name: Grand Foyer
+description: You stand in a dusty foyer. A grand staircase leads up to the north. Cobwebs hang from the chandelier above. To the east is the library, and west leads to the dining room. The front door behind you is locked.
+exits: north=upstairs, east=library, west=dining
+
+[ROOM:library]
+name: Dark Library
+description: Floor-to-ceiling bookshelves line the walls. The books are ancient and crumbling. A cold draft makes the candles flicker. The foyer is to the west.
+exits: west=foyer
+
+[ROOM:dining]
+name: Dining Hall
+description: A long table set for dinner, covered in dust. The plates still have rotting food on them. A door to the south leads to the kitchen. The foyer is to the east.
+exits: east=foyer, south=kitchen
+
+[ROOM:kitchen]
+name: Old Kitchen
+description: Rusty pots hang from hooks. The smell is overwhelming. A basement door stands open to the west. North returns to the dining hall.
+exits: north=dining, west=basement
+
+[ROOM:upstairs]
+name: Upstairs Hallway
+description: A dark hallway with peeling wallpaper. Thunder rumbles outside. A bedroom door is to the east. Stairs lead down to the south.
+exits: south=foyer, east=bedroom
+
+[ROOM:bedroom]
+name: Master Bedroom
+description: A four-poster bed dominates the room. The mirror on the wall is cracked. You feel like you're being watched. The hallway is to the west.
+exits: west=upstairs
+
+[ROOM:basement]
+name: Damp Basement
+description: Stone walls drip with moisture. Old crates are stacked in corners. Something scuttles in the darkness. Stairs lead up to the east.
+exits: east=kitchen
+
+[ITEM:candle]
+name: silver candlestick
+description: A tarnished silver candlestick. Heavy enough to use as a weapon if needed. The candle is still burning with an eerie blue flame.
+takeable: yes
+location: foyer
+
+[ITEM:book]
+name: leather journal
+description: An old leather-bound journal. The pages are filled with strange symbols and warnings about the mansion. The last entry is dated 1887.
+takeable: yes
+location: library
+
+[ITEM:portrait]
+name: family portrait
+description: A large oil painting of a stern-looking family. Their eyes seem to follow you around the room. Too large to carry.
+takeable: no
+location: dining
+
+[ITEM:knife]
+name: kitchen knife
+description: A rusty but sharp kitchen knife. The handle is stained with something dark.
+takeable: yes
+location: kitchen
+
+[ITEM:mirror]
+name: hand mirror
+description: A small hand mirror with an ornate silver frame. When you look into it, you see something moving behind you, but nothing is there when you turn around.
+takeable: yes
+location: bedroom
+
+[ITEM:chest]
+name: wooden chest
+description: An old locked chest. It rattles when you shake it, suggesting something valuable inside. You'll need a key to open it.
+takeable: no
+location: basement
+
+[ITEM:amulet]
+name: golden amulet
+description: A golden amulet with a strange red gem. It feels unnaturally warm. Ancient runes are carved around the edge.
+takeable: yes
+location: basement
