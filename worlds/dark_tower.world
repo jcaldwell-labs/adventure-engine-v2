@@ -1,0 +1,46 @@
+# The Dark Tower - A demo adventure for Adventure Engine v2
+
+[WORLD]
+name: The Dark Tower
+author: Adventure Engine Team
+version: 1.0
+start: entrance
+
+[ROOM:entrance]
+name: Tower Entrance
+description: You stand before a massive dark tower. Its stone walls are cold and ancient. A heavy wooden door stands ajar to the north.
+exits: north=hall
+
+[ROOM:hall]
+name: Grand Hall
+description: A vast hall with high vaulted ceilings. Torches flicker on the walls, casting dancing shadows. Stone stairs lead up to the east. The exit is to the south.
+exits: south=entrance, east=chamber
+
+[ROOM:chamber]
+name: Treasure Chamber
+description: A small chamber filled with ancient artifacts. Dust covers everything. Stairs lead down to the west.
+exits: west=hall
+
+[ITEM:key]
+name: rusty key
+description: An old iron key, covered in rust but still functional. It looks like it might open an ancient lock.
+takeable: yes
+location: entrance
+
+[ITEM:torch]
+name: burning torch
+description: A wooden torch with flames that never seem to die. The fire flickers but provides steady light.
+takeable: yes
+location: hall
+
+[ITEM:statue]
+name: stone statue
+description: A heavy stone statue of a forgotten king. His stone eyes seem to watch you. Too heavy to move.
+takeable: no
+location: hall
+
+[ITEM:gem]
+name: glowing gem
+description: A brilliant blue gem that pulses with inner light. It feels warm to the touch and seems to hum softly.
+takeable: yes
+location: chamber

@@ -19,7 +19,7 @@ LIB_PATH = $(BUILD_DIR)/$(LIB_NAME)
 
 # Adventure engine
 ENGINE_NAME = adventure-engine
-ENGINE_SRC = $(SRC_DIR)/main.c $(SRC_DIR)/parser.c $(SRC_DIR)/world.c
+ENGINE_SRC = $(SRC_DIR)/main.c $(SRC_DIR)/parser.c $(SRC_DIR)/world.c $(SRC_DIR)/world_loader.c $(SRC_DIR)/save_load.c
 ENGINE_OBJ = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(ENGINE_SRC))
 ENGINE_BIN = $(BUILD_DIR)/$(ENGINE_NAME)
 
