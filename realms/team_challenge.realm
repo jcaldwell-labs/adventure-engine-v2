@@ -1,0 +1,155 @@
+[WORLD]
+name: The Team Challenge - Collaborative Puzzle Chamber
+author: Adventure Engine Team
+start: starting_chamber
+description: A collaborative adventure designed for team building. Requires 2-4 players working together to solve puzzles and escape.
+
+# STARTING AREA
+[ROOM:starting_chamber]
+name: The Starting Chamber
+description: You awaken in a circular stone chamber with your teammates. Ancient runes glow faintly on the walls. Three sealed doors stand before you: one marked with a SWORD, one with a BOOK, and one with clasped HANDS. A pedestal in the center holds a glowing crystal.
+exits: north=valor_gate,east=wisdom_gate,south=unity_gate
+items: crystal_key,ancient_tablet
+
+[ITEM:crystal_key]
+name: glowing crystal key
+description: A crystalline key that pulses with inner light. It seems to resonate when held by multiple people. [REQUIRES: 2+ players to pick up]
+takeable: yes
+location: starting_chamber
+
+[ITEM:ancient_tablet]
+name: ancient tablet
+description: An old stone tablet with inscriptions. "TOGETHER YOU STAND, DIVIDED YOU FALL. THE CRYSTAL KEY REQUIRES THE HANDS OF ALL." Below are role-specific hints: LEADER sees objectives, SCOUT reveals paths, ENGINEER unlocks mechanisms, MEDIC heals and supports, DIPLOMAT reads ancient texts.
+takeable: yes
+location: starting_chamber
+
+# PATH OF VALOR (Combat/Leadership Challenge)
+[ROOM:valor_gate]
+name: The Gate of Valor
+description: A heavy iron gate blocks the northern passage. Ancient armor decorates the walls. An inscription reads: "ONLY THOSE WHO LEAD WITH COURAGE MAY PASS." [REQUIRES: LEADER role to unlock]
+exits: south=starting_chamber,north=valor_hall
+items: iron_gate
+
+[ITEM:iron_gate]
+name: sealed iron gate
+description: A massive gate with a leadership seal. Only one who can inspire others may open it.
+takeable: no
+location: valor_gate
+
+[ROOM:valor_hall]
+name: Hall of Valor
+description: A grand hall with banners of ancient warriors. At the far end, a chest sits on a raised platform. The chest requires two people to open simultaneously.
+exits: south=valor_gate
+items: valor_chest,team_banner
+
+[ITEM:valor_chest]
+name: valor chest
+description: A large chest requiring two people to lift the lid simultaneously. [COLLABORATIVE ITEM]
+takeable: no
+location: valor_hall
+
+[ITEM:team_banner]
+name: team banner
+description: A banner bearing your team's colors. Taking this signifies your team's valor. [OBJECTIVE ITEM]
+takeable: yes
+location: valor_hall
+
+# PATH OF WISDOM (Puzzle/Knowledge Challenge)
+[ROOM:wisdom_gate]
+name: The Gate of Wisdom
+description: Bookshelves line the walls of this passage. A complex mechanism blocks the way forward. Strange symbols glow on the walls. [REQUIRES: ENGINEER to solve or DIPLOMAT to decode]
+exits: west=starting_chamber,east=library
+items: puzzle_mechanism
+
+[ITEM:puzzle_mechanism]
+name: ancient mechanism
+description: A complex locking mechanism with rotating symbols. An engineer could solve it mechanically, or a diplomat could decode the symbols.
+takeable: no
+location: wisdom_gate
+
+[ROOM:library]
+name: The Ancient Library
+description: Towering shelves filled with ancient tomes surround you. A pedestal in the center holds an open book. The pages show a map, but only a SCOUT can decipher it fully.
+exits: west=wisdom_gate
+items: ancient_map,wisdom_tome
+
+[ITEM:ancient_map]
+name: ancient map
+description: A detailed map of the chamber complex. A SCOUT can reveal hidden passages and secret areas. [ROLE-SPECIFIC]
+takeable: yes
+location: library
+
+[ITEM:wisdom_tome]
+name: tome of wisdom
+description: A heavy book containing the collective knowledge of those who came before. [OBJECTIVE ITEM]
+takeable: yes
+location: library
+
+# PATH OF UNITY (Teamwork Challenge)
+[ROOM:unity_gate]
+name: The Gate of Unity
+description: Four pressure plates are arranged in a circle around a central door. The inscription reads: "STAND TOGETHER AS ONE, AND THE PATH SHALL OPEN." [REQUIRES: All players to stand on plates simultaneously]
+exits: north=starting_chamber,south=unity_chamber
+items: pressure_plates
+
+[ITEM:pressure_plates]
+name: four pressure plates
+description: Four stone plates embedded in the floor. They must all be pressed simultaneously by different team members to unlock the door.
+takeable: no
+location: unity_gate
+
+[ROOM:unity_chamber]
+name: Chamber of Unity
+description: A peaceful room with murals depicting teams working together throughout history. At the center is a fountain where wounded teammates can be healed by a MEDIC.
+exits: north=unity_gate,down=secret_vault
+items: healing_fountain,unity_crystal
+
+[ITEM:healing_fountain]
+name: healing fountain
+description: Crystal-clear water that can restore health. A MEDIC can use this to heal all teammates. [ROLE-SPECIFIC: MEDIC]
+takeable: no
+location: unity_chamber
+
+[ITEM:unity_crystal]
+name: crystal of unity
+description: A beautiful crystal that glows brighter when the team is together. [OBJECTIVE ITEM]
+takeable: yes
+location: unity_chamber
+
+# SECRET AREA (Requires Scout to find)
+[ROOM:secret_vault]
+name: Hidden Vault
+description: A secret chamber revealed by the SCOUT's keen eye. Ancient treasures and a final challenge await. A large door requires items from all three paths to open.
+exits: up=unity_chamber,west=final_chamber
+items: final_door,treasure_hoard
+
+[ITEM:final_door]
+name: sealed vault door
+description: The final door requires three artifacts: the Team Banner (valor), the Tome of Wisdom (wisdom), and the Crystal of Unity (unity). Only when all three are gathered can the team proceed.
+takeable: no
+location: secret_vault
+
+[ITEM:treasure_hoard]
+name: ancient treasure
+description: Piles of gold, gems, and artifacts from ages past. But the true treasure is what your team learned together.
+takeable: yes
+location: secret_vault
+
+# FINAL CHAMBER
+[ROOM:final_chamber]
+name: The Victory Chamber
+description: You've made it! Sunlight streams through a newly opened exit. Your teamwork has overcome every challenge. A plaque on the wall reads: "TRUE STRENGTH LIES NOT IN INDIVIDUAL POWER, BUT IN UNITY OF PURPOSE."
+exits: east=secret_vault
+items: victory_plaque,exit_portal
+
+[ITEM:victory_plaque]
+name: victory plaque
+description: A golden plaque commemorating your team's success. Your names will be inscribed here for future adventurers to see.
+takeable: no
+location: final_chamber
+
+[ITEM:exit_portal]
+name: exit portal
+description: A shimmering portal leading back to reality. Your team can leave together, victorious.
+takeable: no
+location: final_chamber

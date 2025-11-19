@@ -1,0 +1,99 @@
+[CAMPAIGN]
+name: Introduction to Team Building
+description: A fast-paced introduction campaign teaching collaboration, communication, and role-based teamwork. Perfect for corporate training or educational settings.
+author: Adventure Engine Team
+version: 1.0
+estimated_time: 45 minutes
+min_players: 2
+max_players: 4
+difficulty: beginner
+
+[OBJECTIVES]
+primary: Complete all team challenges and reach the victory chamber
+secondary: Discover the secret vault
+bonus: Complete without any player health dropping below 50%
+
+[REALMS]
+# Realm progression - each realm builds on previous learnings
+sequence: team_challenge
+# Future expansion: add more realms in sequence
+
+[REALM:team_challenge]
+file: team_challenge.realm
+order: 1
+required: yes
+time_limit: 45
+description: The core team challenge teaching collaborative problem-solving
+success_criteria: reach_victory_chamber
+failure_criteria: all_players_defeated,time_expired
+
+[ROLES]
+required_roles: none
+recommended_roles: LEADER,SCOUT,ENGINEER,MEDIC
+optional_roles: DIPLOMAT,SPECIALIST
+
+[TEAM_MECHANICS]
+shared_inventory: no
+shared_health: no
+communication_required: yes
+role_restrictions: yes
+collaborative_puzzles: yes
+
+[SCORING]
+completion_bonus: 1000
+time_bonus_per_minute_saved: 50
+objective_points: 100
+discovery_bonus: 250
+perfect_health_bonus: 500
+
+[DEBRIEFING]
+metrics:
+- total_time
+- commands_per_player
+- items_found
+- puzzles_solved
+- team_communication_count
+- role_utilization
+
+insights:
+- leadership_effectiveness
+- team_coordination
+- problem_solving_approach
+- communication_patterns
+
+[LEARNING_OBJECTIVES]
+skills:
+- Collaborative problem solving
+- Role-based teamwork
+- Communication under pressure
+- Strategic decision making
+- Resource sharing
+
+outcomes:
+- Players understand importance of diverse roles
+- Teams learn to leverage individual strengths
+- Communication skills improved
+- Trust building through shared challenges
+
+[FACILITATOR_NOTES]
+setup_time: 5 minutes
+debrief_time: 15 minutes
+
+key_observations:
+- Watch for emerging leaders
+- Note communication patterns
+- Observe how team handles setbacks
+- Track role utilization
+
+discussion_prompts:
+- "What roles emerged naturally in your team?"
+- "How did you decide which path to take first?"
+- "What was your biggest challenge?"
+- "How did you communicate effectively?"
+- "What would you do differently?"
+
+[METADATA]
+tags: teambuilding,corporate,training,communication,collaboration
+industry: corporate,education,gaming
+created: 2025-11-19
+updated: 2025-11-19
