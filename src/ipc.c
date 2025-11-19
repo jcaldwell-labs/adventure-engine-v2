@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <dirent.h>
 
 // Initialize IPC system
 bool ipc_init(void) {
@@ -23,10 +24,24 @@ bool ipc_init(void) {
 
 // Clean up old sockets
 void ipc_cleanup(void) {
-    // Remove all .sock files in IPC_SOCKET_DIR
-    char cmd[512];
-    snprintf(cmd, sizeof(cmd), "rm -f %s/*.sock 2>/dev/null", IPC_SOCKET_DIR);
-    system(cmd);
+    // Remove all .sock files in IPC_SOCKET_DIR using directory iteration
+    DIR* dir = opendir(IPC_SOCKET_DIR);
+    if (!dir) {
+        return;  // Directory doesn't exist or can't be opened
+    }
+
+    struct dirent* entry;
+    while ((entry = readdir(dir)) != NULL) {
+        // Check if filename ends with .sock
+        size_t len = strlen(entry->d_name);
+        if (len > 5 && strcmp(entry->d_name + len - 5, ".sock") == 0) {
+            char path[512];
+            snprintf(path, sizeof(path), "%s/%s", IPC_SOCKET_DIR, entry->d_name);
+            unlink(path);
+        }
+    }
+
+    closedir(dir);
 }
 
 // Generate socket path for session/player
@@ -79,11 +94,13 @@ Message* ipc_message_create(MessageType type, const char* session_id,
     msg->priority = PRIORITY_NORMAL;
 
     if (session_id) {
-        strncpy(msg->session_id, session_id, 63);
+        strncpy(msg->session_id, session_id, MAX_ID_LENGTH - 1);
+        msg->session_id[MAX_ID_LENGTH - 1] = '\0';
     }
 
     if (player_id) {
-        strncpy(msg->player_id, player_id, 63);
+        strncpy(msg->player_id, player_id, MAX_ID_LENGTH - 1);
+        msg->player_id[MAX_ID_LENGTH - 1] = '\0';
     }
 
     msg->sequence = 0;
@@ -272,8 +289,10 @@ IPCChannel* ipc_channel_create(const char* session_id, const char* player_id) {
         return NULL;
     }
 
-    strncpy(channel->session_id, session_id, 63);
-    strncpy(channel->player_id, player_id, 63);
+    strncpy(channel->session_id, session_id, MAX_ID_LENGTH - 1);
+    channel->session_id[MAX_ID_LENGTH - 1] = '\0';
+    strncpy(channel->player_id, player_id, MAX_ID_LENGTH - 1);
+    channel->player_id[MAX_ID_LENGTH - 1] = '\0';
 
     ipc_generate_socket_path(session_id, player_id,
                             channel->socket_path, sizeof(channel->socket_path));

@@ -33,6 +33,13 @@ mkdir -p "$STATE_DIR"
 # Generate or use provided session ID
 if [ -z "$SESSION_ID" ]; then
     SESSION_ID="SESS-$(date +%Y%m%d-%H%M%S)-$$"
+else
+    # Validate session ID format to prevent path traversal attacks
+    # Must match: SESS-YYYYMMDD-HHMMSS-PID or similar alphanumeric-dash format
+    if ! [[ "$SESSION_ID" =~ ^[A-Za-z0-9_-]+$ ]]; then
+        echo "ERROR: Invalid session ID format. Only alphanumeric, dash, and underscore characters allowed."
+        exit 1
+    fi
 fi
 
 TMUX_SESSION="adventure-$SESSION_ID"

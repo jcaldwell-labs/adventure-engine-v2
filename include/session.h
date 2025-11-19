@@ -8,6 +8,8 @@
 #define MAX_SESSION_NAME 128
 #define MAX_SESSIONS 16
 #define MAX_PLAYERS_PER_SESSION 8
+#define MAX_GM_NAME 64
+#define MAX_REALM_NAME 64
 
 // Session states
 typedef enum {
@@ -22,7 +24,7 @@ typedef enum {
 typedef struct {
     char id[MAX_SESSION_ID];                // Unique session ID (generated)
     char campaign_name[MAX_SESSION_NAME];   // Campaign being played
-    char gm_name[64];                       // Game Master name
+    char gm_name[MAX_GM_NAME];              // Game Master name
 
     time_t created_at;
     time_t updated_at;
@@ -35,8 +37,8 @@ typedef struct {
 
     SessionState state;
 
-    char current_realm[64]; // Current realm in campaign
-    int realm_index;        // Index in campaign sequence
+    char current_realm[MAX_REALM_NAME];     // Current realm in campaign
+    int realm_index;                        // Index in campaign sequence
 
     // Statistics
     int commands_processed;

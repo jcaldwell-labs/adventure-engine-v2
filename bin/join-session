@@ -20,6 +20,18 @@ if [ -z "$SESSION_ID" ] || [ -z "$USERNAME" ] || [ -z "$ROLE" ]; then
     exit 1
 fi
 
+# Validate session ID format to prevent path traversal attacks
+if ! [[ "$SESSION_ID" =~ ^[A-Za-z0-9_-]+$ ]]; then
+    echo "ERROR: Invalid session ID format. Only alphanumeric, dash, and underscore characters allowed."
+    exit 1
+fi
+
+# Validate username format
+if ! [[ "$USERNAME" =~ ^[A-Za-z0-9_-]+$ ]]; then
+    echo "ERROR: Invalid username format. Only alphanumeric, dash, and underscore characters allowed."
+    exit 1
+fi
+
 # Validate role
 case "${ROLE^^}" in
     LEADER|SCOUT|ENGINEER|MEDIC|DIPLOMAT|SPECIALIST)

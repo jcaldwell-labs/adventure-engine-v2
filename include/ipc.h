@@ -8,6 +8,8 @@
 #define IPC_SOCKET_DIR "/tmp/adventure-engine"
 #define MAX_MESSAGE_SIZE 4096
 #define MAX_PAYLOAD_SIZE 3584
+#define MAX_ID_LENGTH 64
+#define MAX_SOCKET_PATH 256
 
 // Message types
 typedef enum {
@@ -36,8 +38,8 @@ typedef struct {
     MessageType type;
     MessagePriority priority;
 
-    char session_id[64];
-    char player_id[64];
+    char session_id[MAX_ID_LENGTH];
+    char player_id[MAX_ID_LENGTH];
     uint32_t sequence;      // For ordering
     time_t timestamp;
 
@@ -65,12 +67,12 @@ typedef struct {
 
 // IPC channel (per player connection)
 typedef struct {
-    char socket_path[256];
+    char socket_path[MAX_SOCKET_PATH];
     int socket_fd;
     bool is_open;
 
-    char session_id[64];
-    char player_id[64];
+    char session_id[MAX_ID_LENGTH];
+    char player_id[MAX_ID_LENGTH];
 
     MessageQueue* send_queue;
     MessageQueue* recv_queue;

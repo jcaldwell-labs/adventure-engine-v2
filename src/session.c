@@ -66,7 +66,8 @@ Session* session_create(const char* campaign_name, const char* gm_name,
 
     // Set basic info
     strncpy(session->campaign_name, campaign_name, MAX_SESSION_NAME - 1);
-    strncpy(session->gm_name, gm_name, 63);
+    strncpy(session->gm_name, gm_name, MAX_GM_NAME - 1);
+    session->gm_name[MAX_GM_NAME - 1] = '\0';
 
     // Initialize timestamps
     session->created_at = time(NULL);
@@ -84,7 +85,7 @@ Session* session_create(const char* campaign_name, const char* gm_name,
     session->state = SESSION_LOBBY;
 
     // Realm tracking
-    strcpy(session->current_realm, "");
+    session->current_realm[0] = '\0';
     session->realm_index = 0;
 
     // Statistics
@@ -271,7 +272,8 @@ bool session_load(Session* session, const char* session_id) {
             } else if (strcmp(key, "campaign") == 0) {
                 strncpy(session->campaign_name, value, MAX_SESSION_NAME - 1);
             } else if (strcmp(key, "gm") == 0) {
-                strncpy(session->gm_name, value, 63);
+                strncpy(session->gm_name, value, MAX_GM_NAME - 1);
+                session->gm_name[MAX_GM_NAME - 1] = '\0';
             } else if (strcmp(key, "created") == 0) {
                 session->created_at = atol(value);
             } else if (strcmp(key, "updated") == 0) {
@@ -287,7 +289,8 @@ bool session_load(Session* session, const char* session_id) {
             } else if (strcmp(key, "current_players") == 0) {
                 session->current_players = atoi(value);
             } else if (strcmp(key, "current_realm") == 0) {
-                strncpy(session->current_realm, value, 63);
+                strncpy(session->current_realm, value, MAX_REALM_NAME - 1);
+                session->current_realm[MAX_REALM_NAME - 1] = '\0';
             } else if (strcmp(key, "realm_index") == 0) {
                 session->realm_index = atoi(value);
             } else if (strcmp(key, "commands_processed") == 0) {
@@ -461,9 +464,16 @@ bool registry_save(const SessionRegistry* registry) {
         return false;
     }
 
-    fwrite(&registry->session_count, sizeof(int), 1, fp);
-    fwrite(&registry->last_cleanup, sizeof(time_t), 1, fp);
-    fwrite(registry->sessions, sizeof(Session), registry->session_count, fp);
+    size_t written = 0;
+    written += fwrite(&registry->session_count, sizeof(int), 1, fp);
+    written += fwrite(&registry->last_cleanup, sizeof(time_t), 1, fp);
+    written += fwrite(registry->sessions, sizeof(Session), registry->session_count, fp);
+
+    if (written != (size_t)(2 + registry->session_count)) {
+        fprintf(stderr, "Failed to write complete registry data\n");
+        fclose(fp);
+        return false;
+    }
 
     fclose(fp);
     return true;
@@ -480,9 +490,24 @@ bool registry_load(SessionRegistry* registry) {
         return false;  // No registry file exists yet
     }
 
-    fread(&registry->session_count, sizeof(int), 1, fp);
-    fread(&registry->last_cleanup, sizeof(time_t), 1, fp);
-    fread(registry->sessions, sizeof(Session), registry->session_count, fp);
+    size_t read = 0;
+    read += fread(&registry->session_count, sizeof(int), 1, fp);
+    read += fread(&registry->last_cleanup, sizeof(time_t), 1, fp);
+
+    // Validate session count before reading sessions
+    if (registry->session_count < 0 || registry->session_count > MAX_SESSIONS) {
+        fprintf(stderr, "Invalid session count in registry: %d\n", registry->session_count);
+        fclose(fp);
+        return false;
+    }
+
+    read += fread(registry->sessions, sizeof(Session), registry->session_count, fp);
+
+    if (read != (size_t)(2 + registry->session_count)) {
+        fprintf(stderr, "Failed to read complete registry data\n");
+        fclose(fp);
+        return false;
+    }
 
     fclose(fp);
     return true;

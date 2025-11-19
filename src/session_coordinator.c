@@ -110,7 +110,8 @@ bool handle_create_session(const char* campaign, const char* gm,
     printf("  GM: %s\n", gm);
     printf("  Players: %d-%d\n", min_players, max_players);
 
-    // Don't free session - it's in the registry now
+    // Free the original session - registry has made a copy
+    session_destroy(session);
     return true;
 }
 
