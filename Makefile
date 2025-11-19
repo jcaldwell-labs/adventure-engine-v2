@@ -23,15 +23,21 @@ ENGINE_SRC = $(SRC_DIR)/main.c $(SRC_DIR)/parser.c $(SRC_DIR)/world.c $(SRC_DIR)
 ENGINE_OBJ = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(ENGINE_SRC))
 ENGINE_BIN = $(BUILD_DIR)/$(ENGINE_NAME)
 
+# Multiplayer components
+MP_NAME = session-coordinator
+MP_SRC = $(SRC_DIR)/session_coordinator.c $(SRC_DIR)/session.c $(SRC_DIR)/player.c $(SRC_DIR)/ipc.c
+MP_OBJ = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(MP_SRC))
+MP_BIN = $(BUILD_DIR)/$(MP_NAME)
+
 # Test program
 TEST_NAME = test_smartterm
 TEST_SRC = $(SRC_DIR)/test_smartterm.c
 TEST_OBJ = $(BUILD_DIR)/test_smartterm.o
 TEST_BIN = $(BUILD_DIR)/$(TEST_NAME)
 
-.PHONY: all clean lib engine test run run-test
+.PHONY: all clean lib engine multiplayer test run run-test run-coordinator
 
-all: lib engine
+all: lib engine multiplayer
 
 # Create build directory
 $(BUILD_DIR):
@@ -61,6 +67,12 @@ engine: $(ENGINE_BIN)
 $(ENGINE_BIN): $(ENGINE_OBJ) $(LIB_PATH) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
+# Build multiplayer coordinator
+multiplayer: $(MP_BIN)
+
+$(MP_BIN): $(MP_OBJ) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
@@ -71,6 +83,9 @@ run: engine
 run-test: test
 	$(TEST_BIN)
 
+run-coordinator: multiplayer
+	$(MP_BIN)
+
 # Clean
 clean:
 	rm -rf $(BUILD_DIR)
@@ -80,11 +95,13 @@ help:
 	@echo "Adventure Engine v2 - Build System"
 	@echo ""
 	@echo "Targets:"
-	@echo "  all       - Build library and engine (default)"
-	@echo "  lib       - Build smartterm_simple library"
-	@echo "  engine    - Build adventure engine"
-	@echo "  test      - Build test program"
-	@echo "  run       - Build and run adventure engine"
-	@echo "  run-test  - Build and run test program"
-	@echo "  clean     - Remove build artifacts"
-	@echo "  help      - Show this help"
+	@echo "  all              - Build library, engine, and multiplayer (default)"
+	@echo "  lib              - Build smartterm_simple library"
+	@echo "  engine           - Build adventure engine"
+	@echo "  multiplayer      - Build session coordinator"
+	@echo "  test             - Build test program"
+	@echo "  run              - Build and run adventure engine"
+	@echo "  run-coordinator  - Build and run session coordinator"
+	@echo "  run-test         - Build and run test program"
+	@echo "  clean            - Remove build artifacts"
+	@echo "  help             - Show this help"

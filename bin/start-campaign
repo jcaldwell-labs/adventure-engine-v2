@@ -1,0 +1,162 @@
+#!/bin/bash
+#
+# Start Campaign - Launch a multiplayer adventure campaign in tmux
+#
+# Usage: start-campaign <campaign_name> <max_players> [session_id]
+#
+
+set -e
+
+CAMPAIGN_NAME="$1"
+MAX_PLAYERS="${2:-4}"
+SESSION_ID="$3"
+
+if [ -z "$CAMPAIGN_NAME" ]; then
+    echo "Usage: $0 <campaign_name> <max_players> [session_id]"
+    echo ""
+    echo "Example: $0 intro_training 4"
+    echo ""
+    exit 1
+fi
+
+# Directories
+PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+BUILD_DIR="$PROJECT_ROOT/build"
+BIN_DIR="$PROJECT_ROOT/bin"
+PANEL_DIR="$PROJECT_ROOT/panels"
+CAMPAIGNS_DIR="$PROJECT_ROOT/campaigns"
+STATE_DIR="/tmp/adventure-campaign-$CAMPAIGN_NAME"
+
+# Create state directory
+mkdir -p "$STATE_DIR"
+
+# Generate or use provided session ID
+if [ -z "$SESSION_ID" ]; then
+    SESSION_ID="SESS-$(date +%Y%m%d-%H%M%S)-$$"
+fi
+
+TMUX_SESSION="adventure-$SESSION_ID"
+
+echo "=================================================="
+echo "  ADVENTURE ENGINE - MULTIPLAYER CAMPAIGN"
+echo "=================================================="
+echo "Campaign:    $CAMPAIGN_NAME"
+echo "Max Players: $MAX_PLAYERS"
+echo "Session ID:  $SESSION_ID"
+echo "Tmux Session: $TMUX_SESSION"
+echo "=================================================="
+echo ""
+
+# Check if tmux session already exists
+if tmux has-session -t "$TMUX_SESSION" 2>/dev/null; then
+    echo "ERROR: Tmux session '$TMUX_SESSION' already exists!"
+    echo "Attach with: tmux attach -t $TMUX_SESSION"
+    exit 1
+fi
+
+# Create named pipes for panel communication
+PIPE_NARRATIVE="$STATE_DIR/pipe_narrative"
+PIPE_MAP="$STATE_DIR/pipe_map"
+PIPE_STATS="$STATE_DIR/pipe_stats"
+PIPE_LOG="$STATE_DIR/pipe_log"
+
+rm -f "$PIPE_NARRATIVE" "$PIPE_MAP" "$PIPE_STATS" "$PIPE_LOG"
+mkfifo "$PIPE_NARRATIVE" "$PIPE_MAP" "$PIPE_STATS" "$PIPE_LOG"
+
+echo "Created communication pipes in $STATE_DIR"
+
+# Save session metadata
+cat > "$STATE_DIR/session.meta" <<EOF
+campaign=$CAMPAIGN_NAME
+max_players=$MAX_PLAYERS
+session_id=$SESSION_ID
+tmux_session=$TMUX_SESSION
+created=$(date)
+EOF
+
+echo "Starting tmux session..."
+
+# Create tmux session with multi-panel layout
+tmux new-session -d -s "$TMUX_SESSION" -n campaign
+
+# Split into 4 panels:
+# ┌─────────────────┬──────────────┐
+# │   NARRATIVE     │     MAP      │
+# │   (main story)  │  (ASCII map) │
+# ├─────────────────┼──────────────┤
+# │   TEAM STATS    │   LOG/CHAT   │
+# │  (health, inv)  │  (actions)   │
+# └─────────────────┴──────────────┘
+
+# Split horizontally
+tmux split-window -h -t "$TMUX_SESSION:campaign.0"
+
+# Split both vertically
+tmux split-window -v -t "$TMUX_SESSION:campaign.0"
+tmux split-window -v -t "$TMUX_SESSION:campaign.2"
+
+# Setup panels
+echo "Configuring panels..."
+
+# Panel 0 (top-left): NARRATIVE
+tmux send-keys -t "$TMUX_SESSION:campaign.0" \
+    "echo '=== NARRATIVE PANEL ==='; tail -f '$PIPE_NARRATIVE' 2>/dev/null || sleep infinity" C-m
+
+# Panel 1 (top-right): MAP
+tmux send-keys -t "$TMUX_SESSION:campaign.1" \
+    "echo '=== MAP PANEL ==='; tail -f '$PIPE_MAP' 2>/dev/null || sleep infinity" C-m
+
+# Panel 2 (bottom-left): TEAM STATS
+tmux send-keys -t "$TMUX_SESSION:campaign.2" \
+    "echo '=== TEAM STATS ==='; tail -f '$PIPE_STATS' 2>/dev/null || sleep infinity" C-m
+
+# Panel 3 (bottom-right): LOG
+tmux send-keys -t "$TMUX_SESSION:campaign.3" \
+    "echo '=== TEAM LOG ==='; tail -f '$PIPE_LOG' 2>/dev/null || sleep infinity" C-m
+
+# Send initial content to panels
+echo "" > "$PIPE_NARRATIVE" &
+echo "" > "$PIPE_MAP" &
+echo "" > "$PIPE_STATS" &
+echo "" > "$PIPE_LOG" &
+
+# Create a new window for GM/admin controls
+tmux new-window -t "$TMUX_SESSION:1" -n "gm-dashboard"
+tmux send-keys -t "$TMUX_SESSION:gm-dashboard.0" \
+    "echo '=== GM DASHBOARD ==='; echo 'Session: $SESSION_ID'; echo 'Campaign: $CAMPAIGN_NAME'; echo ''; echo 'Controls will appear here...'; bash" C-m
+
+# Create windows for each player (up to max_players)
+for i in $(seq 1 $MAX_PLAYERS); do
+    WINDOW_NAME="player$i"
+    tmux new-window -t "$TMUX_SESSION:$((i+1))" -n "$WINDOW_NAME"
+    tmux send-keys -t "$TMUX_SESSION:$WINDOW_NAME.0" \
+        "echo '=== PLAYER $i INPUT ==='; echo 'Waiting for player to join...'; echo ''; echo 'Use: join-session $SESSION_ID <username> <role>'; bash" C-m
+done
+
+# Select the main campaign window
+tmux select-window -t "$TMUX_SESSION:campaign"
+tmux select-pane -t "$TMUX_SESSION:campaign.0"
+
+echo ""
+echo "=================================================="
+echo "  CAMPAIGN LAUNCHED SUCCESSFULLY!"
+echo "=================================================="
+echo ""
+echo "Attach to session:"
+echo "  tmux attach -t $TMUX_SESSION"
+echo ""
+echo "Players can join with:"
+echo "  ./bin/join-session $SESSION_ID <username> <role>"
+echo ""
+echo "Available roles:"
+echo "  LEADER, SCOUT, ENGINEER, MEDIC, DIPLOMAT, SPECIALIST"
+echo ""
+echo "State directory: $STATE_DIR"
+echo "=================================================="
+
+# Optionally auto-attach
+read -p "Attach to tmux session now? (y/n) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    tmux attach -t "$TMUX_SESSION"
+fi

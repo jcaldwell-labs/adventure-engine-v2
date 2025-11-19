@@ -1,0 +1,66 @@
+#!/bin/bash
+#
+# Join Session - Join an active multiplayer session
+#
+# Usage: join-session <session_id> <username> <role>
+#
+
+set -e
+
+SESSION_ID="$1"
+USERNAME="$2"
+ROLE="$3"
+
+if [ -z "$SESSION_ID" ] || [ -z "$USERNAME" ] || [ -z "$ROLE" ]; then
+    echo "Usage: $0 <session_id> <username> <role>"
+    echo ""
+    echo "Roles: LEADER, SCOUT, ENGINEER, MEDIC, DIPLOMAT, SPECIALIST"
+    echo ""
+    echo "Example: $0 SESS-20251119-143022-1234 alice LEADER"
+    exit 1
+fi
+
+# Validate role
+case "${ROLE^^}" in
+    LEADER|SCOUT|ENGINEER|MEDIC|DIPLOMAT|SPECIALIST)
+        ;;
+    *)
+        echo "ERROR: Invalid role '$ROLE'"
+        echo "Valid roles: LEADER, SCOUT, ENGINEER, MEDIC, DIPLOMAT, SPECIALIST"
+        exit 1
+        ;;
+esac
+
+PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+BUILD_DIR="$PROJECT_ROOT/build"
+COORDINATOR="$BUILD_DIR/session-coordinator"
+
+echo "=================================================="
+echo "  JOINING ADVENTURE SESSION"
+echo "=================================================="
+echo "Session ID: $SESSION_ID"
+echo "Username:   $USERNAME"
+echo "Role:       $ROLE"
+echo "=================================================="
+echo ""
+
+# TODO: Actually communicate with session coordinator
+# For now, just provide instructions
+
+TMUX_SESSION="adventure-$SESSION_ID"
+
+if ! tmux has-session -t "$TMUX_SESSION" 2>/dev/null; then
+    echo "ERROR: Session '$TMUX_SESSION' not found!"
+    echo ""
+    echo "Available tmux sessions:"
+    tmux list-sessions 2>/dev/null || echo "  (none)"
+    exit 1
+fi
+
+echo "Found session: $TMUX_SESSION"
+echo ""
+echo "Attaching to session..."
+echo ""
+
+# Attach to the tmux session
+exec tmux attach -t "$TMUX_SESSION"

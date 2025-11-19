@@ -1,26 +1,81 @@
-# Adventure Engine v2.0
+# Adventure Engine v3.0 - Multiplayer Team Building Platform
 
-**Status**: World Scripting & Save/Load Complete ✅
-**Version**: 2.0 with World Files & Persistence
-**Latest Update**: Nov 18, 2025
+**Status**: Multiplayer & Tmux Integration Complete ✅
+**Version**: 3.0 with Multiplayer, Tmux Dashboards & Team Building
+**Latest Update**: Nov 19, 2025
 
 ---
 
 ## Overview
 
-Adventure Engine v2 is a text-based adventure game engine built in C with a smart terminal UI. It features a world file loader, save/load system, and multiple playable adventures.
+Adventure Engine v3.0 is a revolutionary **multiplayer text-based adventure platform** designed for team building, corporate training, and collaborative entertainment. Built in C with tmux-based real-time dashboards, it enables 2-8 players to work together in immersive text adventures.
+
+### 🎯 What Makes v3.0 Special
+
+- **🖥️ Tmux Multi-Panel Dashboards**: Real-time narrative, map, stats, and team log
+- **👥 Multiplayer Sessions**: 2-8 players in synchronized adventures
+- **🎭 Role-Based Gameplay**: LEADER, SCOUT, ENGINEER, MEDIC, DIPLOMAT, SPECIALIST
+- **🤝 Collaborative Puzzles**: Challenges requiring teamwork and coordination
+- **📊 Team Analytics**: Track communication, problem-solving, and collaboration
+- **🎓 Training Ready**: Perfect for corporate team building and education
+- **🔧 Zero UI Dependency**: Pure terminal, scriptable, SSH-friendly
 
 ### What This Is
 
-- ✅ Working adventure game engine with parser, world system, and inventory
-- ✅ **NEW**: World file loader - define adventures in simple text files
-- ✅ **NEW**: Save/load system with multiple save slots
-- ✅ **NEW**: Enhanced parser with multi-word item support
-- ✅ **NEW**: 4 complete playable worlds
-- ✅ **NEW**: Examine command for detailed item descriptions
-- ✅ Smart UI with scrolling output, context coloring, status bar
+**Single-Player Features (v1.0 - v2.0):**
+- ✅ Text-based adventure engine with parser, world system, and inventory
+- ✅ World file loader - define adventures in simple text files
+- ✅ Save/load system with multiple save slots
+- ✅ 4 complete playable single-player worlds
+- ✅ Smart terminal UI with scrolling output, context coloring
 - ✅ Command history, line editing (via readline)
-- ✅ Clean architecture: parser, world, UI separated
+
+**Multiplayer Features (v3.0 - NEW!):**
+- ✅ **Session-based multiplayer** - coordinate daemon manages sessions
+- ✅ **Tmux integration** - 4-panel real-time dashboard
+- ✅ **Role-based mechanics** - 6 distinct player roles with unique abilities
+- ✅ **Collaborative puzzles** - challenges requiring teamwork
+- ✅ **Team communication** - shared log and chat system
+- ✅ **Campaign system** - multi-realm progression
+- ✅ **GM dashboard** - facilitator controls and monitoring
+- ✅ **Team analytics** - metrics for debriefing
+- ✅ **Named pipe IPC** - real-time state synchronization
+
+---
+
+## Quick Start - Multiplayer
+
+### 1. Build
+```bash
+make all
+```
+
+### 2. Launch Campaign
+```bash
+./bin/start-campaign intro_training 4
+```
+
+### 3. View Dashboard
+You'll see a 4-panel tmux session:
+```
+┌─────────────────┬──────────────┐
+│   NARRATIVE     │     MAP      │
+│   (story)       │  (players)   │
+├─────────────────┼──────────────┤
+│   TEAM STATS    │   LOG/CHAT   │
+│   (health,inv)  │  (actions)   │
+└─────────────────┴──────────────┘
+```
+
+### 4. Players Join (from separate terminals)
+```bash
+./bin/join-session SESS-20251119-143022-1234 alice LEADER
+./bin/join-session SESS-20251119-143022-1234 bob SCOUT
+./bin/join-session SESS-20251119-143022-1234 carol ENGINEER
+./bin/join-session SESS-20251119-143022-1234 dave MEDIC
+```
+
+**See [docs/QUICK-START-MULTIPLAYER.md](docs/QUICK-START-MULTIPLAYER.md) for details**
 
 ---
 
@@ -30,23 +85,37 @@ Adventure Engine v2 is a text-based adventure game engine built in C with a smar
 
 ```bash
 # Debian/Ubuntu
-sudo apt-get install libncurses-dev libreadline-dev gcc make
+sudo apt-get install tmux libncurses-dev libreadline-dev gcc make
 
 # macOS
-brew install ncurses readline
+brew install tmux ncurses readline
 ```
 
 ### Compile & Run
 
 ```bash
-make        # Build everything
-make run    # Build and run adventure engine
-make clean  # Clean build artifacts
+make all              # Build everything (single + multiplayer)
+make run              # Run single-player engine
+make run-coordinator  # Run multiplayer session coordinator
+make clean            # Clean build artifacts
 ```
 
 ---
 
-## Playing the Game
+## Player Roles (Multiplayer)
+
+| Role | Abilities | Best For |
+|------|-----------|----------|
+| **LEADER** | See objectives, inspire team, make decisions | Organizers, natural leaders |
+| **SCOUT** | Reveal hidden areas, detect secrets, fast movement | Explorers, detail-oriented |
+| **ENGINEER** | Unlock mechanisms, solve puzzles, build tools | Problem-solvers, technical |
+| **MEDIC** | Heal teammates, remove debuffs, revive | Supporters, team-focused |
+| **DIPLOMAT** | Talk to NPCs, negotiate, read ancient texts | Communicators, social |
+| **SPECIALIST** | Wildcard - any ability (reduced effectiveness) | Versatile, small teams |
+
+---
+
+## Playing the Game (Single-Player)
 
 ### Starting a Game
 
