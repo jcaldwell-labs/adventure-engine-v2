@@ -119,11 +119,11 @@ static void parse_exits(World *world, int room_idx, const char *exits_str) {
             char *dir_str = trim(token);
             char *room_id = trim(equals + 1);
 
-            Direction dir = str_to_direction(dir_str);
+            int dir = str_to_direction(dir_str);
             if (dir != -1) {
                 int target_room = world_find_room(world, room_id);
                 if (target_room != -1) {
-                    world_connect_rooms(world, room_idx, dir, target_room);
+                    world_connect_rooms(world, room_idx, (Direction)dir, target_room);
                 } else {
                     fprintf(stderr, "Warning: Room '%s' has invalid exit '%s' to non-existent room '%s'\n",
                             world->rooms[room_idx].id, dir_str, room_id);

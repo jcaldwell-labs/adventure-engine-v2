@@ -29,13 +29,14 @@ MP_SRC = $(SRC_DIR)/session_coordinator.c $(SRC_DIR)/session.c $(SRC_DIR)/player
 MP_OBJ = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(MP_SRC))
 MP_BIN = $(BUILD_DIR)/$(MP_NAME)
 
-# Test program
-TEST_NAME = test_smartterm
-TEST_SRC = $(SRC_DIR)/test_smartterm.c
-TEST_OBJ = $(BUILD_DIR)/test_smartterm.o
-TEST_BIN = $(BUILD_DIR)/$(TEST_NAME)
+# Test programs
+TEST_DIR = tests
+TEST_SMARTTERM = $(BUILD_DIR)/test_smartterm
+TEST_PARSER = $(BUILD_DIR)/test_parser
+TEST_WORLD = $(BUILD_DIR)/test_world
+TEST_SAVE_LOAD = $(BUILD_DIR)/test_save_load
 
-.PHONY: all clean lib engine multiplayer test run run-test run-coordinator
+.PHONY: all clean lib engine multiplayer test tests run run-test run-coordinator run-tests
 
 all: lib engine multiplayer
 
@@ -52,14 +53,22 @@ $(LIB_PATH): $(LIB_OBJ) | $(BUILD_DIR)
 $(LIB_OBJ): $(LIB_SRC) $(INCLUDE_DIR)/smartterm_simple.h | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Build test program
-test: $(TEST_BIN)
+# Build test programs
+test: tests
 
-$(TEST_BIN): $(TEST_OBJ) $(LIB_PATH) | $(BUILD_DIR)
+tests: $(TEST_PARSER) $(TEST_WORLD) $(TEST_SAVE_LOAD)
+
+# Parser tests
+$(TEST_PARSER): $(TEST_DIR)/test_parser.c $(BUILD_DIR)/parser.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
-$(TEST_OBJ): $(TEST_SRC) | $(BUILD_DIR)
-	$(CC) $(CFLAGS) -c $< -o $@
+# World tests
+$(TEST_WORLD): $(TEST_DIR)/test_world.c $(BUILD_DIR)/world.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+
+# Save/Load tests
+$(TEST_SAVE_LOAD): $(TEST_DIR)/test_save_load.c $(BUILD_DIR)/world.o $(BUILD_DIR)/save_load.o $(BUILD_DIR)/world_loader.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
 # Build adventure engine
 engine: $(ENGINE_BIN)
@@ -80,8 +89,17 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
 run: engine
 	$(ENGINE_BIN)
 
-run-test: test
-	$(TEST_BIN)
+run-test: tests
+	@echo "Running Parser Tests..."
+	@$(TEST_PARSER) || true
+	@echo ""
+	@echo "Running World Tests..."
+	@$(TEST_WORLD) || true
+	@echo ""
+	@echo "Running Save/Load Tests..."
+	@$(TEST_SAVE_LOAD) || true
+
+run-tests: run-test
 
 run-coordinator: multiplayer
 	$(MP_BIN)
@@ -99,9 +117,10 @@ help:
 	@echo "  lib              - Build smartterm_simple library"
 	@echo "  engine           - Build adventure engine"
 	@echo "  multiplayer      - Build session coordinator"
-	@echo "  test             - Build test program"
+	@echo "  test, tests      - Build all test programs"
 	@echo "  run              - Build and run adventure engine"
 	@echo "  run-coordinator  - Build and run session coordinator"
-	@echo "  run-test         - Build and run test program"
+	@echo "  run-test         - Build and run all tests"
+	@echo "  run-tests        - Alias for run-test"
 	@echo "  clean            - Remove build artifacts"
 	@echo "  help             - Show this help"

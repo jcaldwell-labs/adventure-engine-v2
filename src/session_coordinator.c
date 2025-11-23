@@ -5,6 +5,7 @@
  * Handles player connections, state synchronization, and event distribution.
  */
 
+#define _DEFAULT_SOURCE  // For usleep() and other POSIX functions
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

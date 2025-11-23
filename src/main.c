@@ -223,7 +223,7 @@ int main(int argc, char *argv[]) {
         }
 
         // Update status
-        char status_right[64];
+        char status_right[128];
         snprintf(status_right, sizeof(status_right), "%s | Turns: %d", g_world_name, turn_count);
         st_update_status("Adventure Engine", status_right);
         st_render();
@@ -318,7 +318,6 @@ void cmd_look(World *world) {
     st_add_output(exits_buf, ST_CTX_COMMENT);
 
     // Show items
-    int item_count = 0;
     for (int i = 0; i < MAX_ITEMS; i++) {
         if (room->items[i] != -1) {
             Item *item = &world->items[room->items[i]];
@@ -326,7 +325,6 @@ void cmd_look(World *world) {
                 char item_buf[128];
                 snprintf(item_buf, sizeof(item_buf), "You see: %s", item->name);
                 st_add_output(item_buf, ST_CTX_NORMAL);
-                item_count++;
             }
         }
     }
@@ -340,13 +338,13 @@ void cmd_go(World *world, const char *direction) {
         return;
     }
 
-    Direction dir = str_to_direction(direction);
+    int dir = str_to_direction(direction);
     if (dir == -1) {
         st_add_output("I don't know that direction.", ST_CTX_NORMAL);
         return;
     }
 
-    if (world_move(world, dir)) {
+    if (world_move(world, (Direction)dir)) {
         st_add_output("", ST_CTX_NORMAL);
         cmd_look(world);
     } else {
