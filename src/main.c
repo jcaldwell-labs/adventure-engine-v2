@@ -318,7 +318,6 @@ void cmd_look(World *world) {
     st_add_output(exits_buf, ST_CTX_COMMENT);
 
     // Show items
-    int item_count = 0;
     for (int i = 0; i < MAX_ITEMS; i++) {
         if (room->items[i] != -1) {
             Item *item = &world->items[room->items[i]];
@@ -326,7 +325,6 @@ void cmd_look(World *world) {
                 char item_buf[128];
                 snprintf(item_buf, sizeof(item_buf), "You see: %s", item->name);
                 st_add_output(item_buf, ST_CTX_NORMAL);
-                item_count++;
             }
         }
     }
