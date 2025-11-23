@@ -95,7 +95,7 @@ Item* world_get_inventory_item(World *world, const char *item_id);
 Item* world_get_room_item(World *world, const char *item_id);
 
 // Convert direction string to enum (returns -1 if invalid)
-Direction str_to_direction(const char *str);
+int str_to_direction(const char *str);
 
 // Convert direction enum to string
 const char* direction_to_str(Direction dir);

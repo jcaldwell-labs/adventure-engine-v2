@@ -237,7 +237,7 @@ Item* world_get_room_item(World *world, const char *item_id) {
     return NULL;
 }
 
-Direction str_to_direction(const char *str) {
+int str_to_direction(const char *str) {
     if (strcmp(str, "north") == 0 || strcmp(str, "n") == 0) return DIR_NORTH;
     if (strcmp(str, "south") == 0 || strcmp(str, "s") == 0) return DIR_SOUTH;
     if (strcmp(str, "east") == 0 || strcmp(str, "e") == 0) return DIR_EAST;
