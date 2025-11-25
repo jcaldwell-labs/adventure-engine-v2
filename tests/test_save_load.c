@@ -125,10 +125,10 @@ void test_save_and_load(void) {
     const char *slot = "test_slot_2";
 
     // Modify world state
-    world1.current_room = 1;  // Move to hall
     world1.rooms[0].visited = true;
+    world_take_item(&world1, "key");  // Take key (while in entrance)
+    world1.current_room = 1;  // Move to hall
     world1.rooms[1].visited = true;
-    world_take_item(&world1, "key");  // Take key
 
     // Save
     ASSERT_TRUE(game_save(&world1, slot, "test_world"), "save should succeed");

@@ -243,13 +243,17 @@ bool game_load(World *world, const char *slot_name, char *world_name, size_t wor
         world->inventory[i] = inventory[i];
     }
 
-    // Apply visited states
-    for (int i = 0; i < world->room_count && i < MAX_ROOMS; i++) {
+    // Apply visited states using the room_count from save file
+    // This ensures visited states are applied even when loading into an empty world
+    int rooms_to_apply = (world->room_count > 0) ? world->room_count : room_count;
+    if (rooms_to_apply > MAX_ROOMS) rooms_to_apply = MAX_ROOMS;
+    
+    for (int i = 0; i < rooms_to_apply; i++) {
         world->rooms[i].visited = visited[i];
     }
 
-    // Apply room items
-    for (int i = 0; i < world->room_count && i < MAX_ROOMS; i++) {
+    // Apply room items using the same room count
+    for (int i = 0; i < rooms_to_apply; i++) {
         for (int j = 0; j < MAX_ITEMS; j++) {
             world->rooms[i].items[j] = room_items[i][j];
         }
