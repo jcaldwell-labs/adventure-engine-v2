@@ -323,6 +323,142 @@ void test_visited_rooms_persistence(void) {
     PASS();
 }
 
+// Test load corrupted save file
+void test_load_corrupted_file(void) {
+    TEST("Load corrupted save file");
+
+    // Create a corrupted save file
+    char save_path[512];
+    snprintf(save_path, sizeof(save_path), "%s/.adventure-saves/corrupted_slot.sav",
+             getenv("HOME"));
+    
+    FILE *f = fopen(save_path, "w");
+    ASSERT_TRUE(f != NULL, "should create test file");
+    
+    // Write invalid/corrupted data
+    fprintf(f, "This is not a valid save file\n");
+    fprintf(f, "VERSION: invalid\n");
+    fprintf(f, "Random garbage data\n");
+    fclose(f);
+
+    // Try to load
+    World world;
+    world_init(&world);
+    char world_name[256];
+    
+    ASSERT_FALSE(game_load(&world, "corrupted_slot", world_name, sizeof(world_name)),
+                 "load should fail gracefully for corrupted file");
+
+    // Cleanup
+    unlink(save_path);
+
+    PASS();
+}
+
+// Test save/load with maximum inventory
+void test_save_max_inventory(void) {
+    TEST("Save/load with maximum inventory");
+
+    // Create a simple world for this test
+    World world;
+    world_init(&world);
+    const char *slot = "test_max_inv";
+
+    // Create one room
+    int room = world_add_room(&world, "storage", "Storage", "A storage room.");
+    world.current_room = room;
+
+    // Add exactly 20 takeable items
+    for (int i = 0; i < MAX_INVENTORY; i++) {
+        char id[32], name[64], desc[256];
+        snprintf(id, sizeof(id), "item_%d", i);
+        snprintf(name, sizeof(name), "Item %d", i);
+        snprintf(desc, sizeof(desc), "Test item %d", i);
+        int item_id = world_add_item(&world, id, name, desc, true);
+        world_place_item(&world, item_id, room);
+    }
+
+    // Take all 20 items
+    for (int i = 0; i < MAX_INVENTORY; i++) {
+        char id[32];
+        snprintf(id, sizeof(id), "item_%d", i);
+        bool taken = world_take_item(&world, id);
+        ASSERT_TRUE(taken, "should be able to take item");
+    }
+
+    // Verify inventory is full
+    int inv_count = 0;
+    for (int i = 0; i < MAX_INVENTORY; i++) {
+        if (world.inventory[i] != -1) inv_count++;
+    }
+    ASSERT_EQ(MAX_INVENTORY, inv_count, "inventory should be full before save");
+
+    // Save
+    ASSERT_TRUE(game_save(&world, slot, "test_world"), "save should succeed");
+
+    // Load
+    World loaded;
+    world_init(&loaded);
+    char world_name[256];
+    ASSERT_TRUE(game_load(&loaded, slot, world_name, sizeof(world_name)), "load should succeed");
+
+    // Verify all 20 items preserved
+    int loaded_count = 0;
+    for (int i = 0; i < MAX_INVENTORY; i++) {
+        if (loaded.inventory[i] != -1) loaded_count++;
+    }
+    ASSERT_EQ(MAX_INVENTORY, loaded_count, "all 20 items should be preserved");
+
+    // Cleanup
+    char save_path[512];
+    snprintf(save_path, sizeof(save_path), "%s/.adventure-saves/%s.sav",
+             getenv("HOME"), slot);
+    unlink(save_path);
+
+    PASS();
+}
+
+// Test overwrite existing save slot
+void test_overwrite_save(void) {
+    TEST("Overwrite existing save slot");
+
+    World world1 = create_test_world();
+    const char *slot = "test_overwrite";
+
+    // Save first state
+    world1.current_room = 0;
+    ASSERT_TRUE(game_save(&world1, slot, "world_v1"), "first save should succeed");
+
+    // Load and verify
+    World check;
+    world_init(&check);
+    char world_name[256];
+    game_load(&check, slot, world_name, sizeof(world_name));
+    ASSERT_STR_EQ("world_v1", world_name, "should load first version");
+
+    // Modify and save again (overwrite)
+    world1.current_room = 2;
+    world1.rooms[0].visited = true;
+    world1.rooms[1].visited = true;
+    world1.rooms[2].visited = true;
+    ASSERT_TRUE(game_save(&world1, slot, "world_v2"), "overwrite save should succeed");
+
+    // Load and verify overwritten state
+    World loaded;
+    world_init(&loaded);
+    game_load(&loaded, slot, world_name, sizeof(world_name));
+    ASSERT_STR_EQ("world_v2", world_name, "should load overwritten version");
+    ASSERT_EQ(2, loaded.current_room, "current room should be updated");
+
+    // Cleanup
+    char save_path[512];
+    snprintf(save_path, sizeof(save_path), "%s/.adventure-saves/%s.sav",
+             getenv("HOME"), slot);
+    unlink(save_path);
+
+    PASS();
+}
+
 // Main test runner
 int main(void) {
     printf("\n=== Save/Load System Test Suite ===\n\n");
@@ -334,6 +470,9 @@ int main(void) {
     test_save_directory_creation();
     test_inventory_persistence();
     test_visited_rooms_persistence();
+    test_load_corrupted_file();
+    test_save_max_inventory();
+    test_overwrite_save();
 
     printf("\n=== Test Results ===\n");
     printf("  Passed: %d\n", tests_passed);
