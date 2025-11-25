@@ -368,7 +368,7 @@ void test_save_max_inventory(void) {
     int room = world_add_room(&world, "storage", "Storage", "A storage room.");
     world.current_room = room;
 
-    // Add exactly 20 takeable items
+    // Add exactly MAX_INVENTORY (20) takeable items to test inventory capacity limit
     for (int i = 0; i < MAX_INVENTORY; i++) {
         char id[32], name[64], desc[256];
         snprintf(id, sizeof(id), "item_%d", i);

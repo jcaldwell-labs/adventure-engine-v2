@@ -243,9 +243,11 @@ bool game_load(World *world, const char *slot_name, char *world_name, size_t wor
         world->inventory[i] = inventory[i];
     }
 
-    // Apply visited states using the room_count from save file
-    // This ensures visited states are applied even when loading into an empty world
-    int rooms_to_apply = (world->room_count > 0) ? world->room_count : room_count;
+    // Apply visited states and room items
+    // Use the minimum of world's room count and save file's room count to avoid
+    // applying states to rooms that don't exist in the current world structure
+    int rooms_to_apply = world->room_count > 0 ? world->room_count : room_count;
+    if (room_count < rooms_to_apply) rooms_to_apply = room_count;
     if (rooms_to_apply > MAX_ROOMS) rooms_to_apply = MAX_ROOMS;
     
     for (int i = 0; i < rooms_to_apply; i++) {
