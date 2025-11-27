@@ -26,3 +26,6 @@ Thumbs.db
 
 # Readline history
 .history
+
+# CodeQL analysis files
+_codeql_detected_source_root
