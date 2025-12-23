@@ -66,6 +66,34 @@ When working with this codebase:
 4. Run `make run-tests` to validate changes
 5. World files in `worlds/` provide examples of the .world format
 
+## Related jcaldwell-labs Projects
+
+Adventure Engine is part of a broader ecosystem of terminal and CLI tools:
+
+### Terminal/TUI Projects
+- smartterm-prototype: Smart terminal with readline-like features (origin of smartterm_simple library)
+- my-grid: ASCII canvas editor with vim-style navigation, zones, PTY support
+- boxes-live: Real-time ASCII box drawing with joystick support
+- terminal-stars: Starfield animation for terminals
+- atari-style: Retro visual effects and shaders for terminal apps
+
+### CLI Tools
+- my-context: Context tracking for development sessions (Go CLI)
+- fintrack: Personal finance tracking CLI (Go)
+
+### Game Engines
+- tario: Terminal-based platformer game (Go)
+
+### Meta/Organization
+- capability-catalog: Skill/capability definitions for AI agents
+
+### Key Synergies
+- atari-style shaders can enhance terminal-stars visuals for space-themed adventures
+- my-grid ASCII editor could export to .world format for room layouts
+- boxes-live real-time drawing could enhance multiplayer tmux dashboards
+- tario and Adventure Engine can share terminal rendering optimizations
+- smartterm-prototype is the origin of this project's terminal UI library
+
 ## Contact
 
 Repository: https://github.com/jcaldwell-labs/adventure-engine-v2

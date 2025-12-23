@@ -445,10 +445,45 @@ Game loaded successfully!
 
 ---
 
-## Related Projects
+## Related jcaldwell-labs Projects
 
-- [smartterm-prototype](https://github.com/jcaldwell-labs/smartterm-prototype) - Original POC
-- [terminal-stars](https://github.com/jcaldwell-labs/terminal-stars) - Space dogfight game
+Adventure Engine is part of the jcaldwell-labs ecosystem of terminal and CLI tools.
+
+### Terminal/TUI Projects
+
+| Project | Description | Synergy with Adventure Engine |
+|---------|-------------|-------------------------------|
+| [smartterm-prototype](https://github.com/jcaldwell-labs/smartterm-prototype) | Smart terminal with readline-like features | **Origin** - smartterm_simple library was extracted from this POC |
+| [my-grid](https://github.com/jcaldwell-labs/my-grid) | ASCII canvas editor with vim-style navigation, zones, PTY support | Could provide ASCII map editor for world visualization |
+| [boxes-live](https://github.com/jcaldwell-labs/boxes-live) | Real-time ASCII box drawing with joystick support | UI components for dashboards and panels |
+| [terminal-stars](https://github.com/jcaldwell-labs/terminal-stars) | Starfield animation for terminals | Visual effects for space-themed adventures |
+| [atari-style](https://github.com/jcaldwell-labs/atari-style) | Retro visual effects and shaders for terminal apps | CRT/retro aesthetic for nostalgic adventure themes |
+
+### CLI Tools
+
+| Project | Description | Synergy with Adventure Engine |
+|---------|-------------|-------------------------------|
+| [my-context](https://github.com/jcaldwell-labs/my-context) | Context tracking for development sessions (Go) | Track game design decisions and world-building sessions |
+| [fintrack](https://github.com/jcaldwell-labs/fintrack) | Personal finance tracking CLI (Go) | Shared CLI patterns and readline integration |
+
+### Game Engines
+
+| Project | Description | Synergy with Adventure Engine |
+|---------|-------------|-------------------------------|
+| [tario](https://github.com/jcaldwell-labs/tario) | Terminal-based platformer game (Go) | Cross-pollinate game mechanics and terminal rendering |
+
+### Meta/Organization
+
+| Project | Description |
+|---------|-------------|
+| [capability-catalog](https://github.com/jcaldwell-labs/capability-catalog) | Skill/capability definitions for AI agents |
+
+### Key Synergies
+
+1. **Visual Enhancement Pipeline**: `atari-style` shaders + `terminal-stars` effects could create immersive space adventure backgrounds
+2. **Map Editing Workflow**: `my-grid` ASCII editor could export directly to `.world` format room layouts
+3. **Dashboard Components**: `boxes-live` real-time drawing could enhance multiplayer tmux dashboards
+4. **Cross-Engine Learning**: `tario` platformer and Adventure Engine can share terminal rendering optimizations
 
 ---
 
