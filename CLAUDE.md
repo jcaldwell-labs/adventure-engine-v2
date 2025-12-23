@@ -251,16 +251,17 @@ make V=1 all
 ### For Users
 
 - `README.md` - Main user documentation
-- `docs/QUICK-START-MULTIPLAYER.md` - 60-second multiplayer guide
-- `docs/WORLD-FORMAT.md` - World file format specification
-- `docs/MULTIPLAYER-SETUP.md` - Multiplayer architecture and setup
+- `docs/guides/QUICK-START-MULTIPLAYER.md` - 60-second multiplayer guide
+- `docs/reference/WORLD-FORMAT.md` - World file format specification
+- `docs/guides/MULTIPLAYER-SETUP.md` - Multiplayer architecture and setup
 
 ### For Developers
 
 - `CLAUDE.md` (this file) - AI development guide
 - `CONTRIBUTING.md` - Contribution guidelines
-- `docs/ARCHITECTURE.md` - System architecture
-- `docs/DEEP-DIVE-*.md` - Detailed component documentation
+- `llms.txt` - AI discoverability metadata
+- `docs/architecture/ARCHITECTURE.md` - System architecture
+- `docs/architecture/DEEP-DIVE-*.md` - Detailed component documentation
 - `SESSION-SUMMARY.md` - Development history
 - `ROADMAP-MULTIPLAYER-TMUX.md` - Future vision
 

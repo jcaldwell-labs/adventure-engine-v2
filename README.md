@@ -1,8 +1,66 @@
 # Adventure Engine v3.0 - Multiplayer Team Building Platform
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![C11](https://img.shields.io/badge/C-C11-blue.svg)](https://en.wikipedia.org/wiki/C11_(C_standard_revision))
+[![Build](https://img.shields.io/badge/build-passing-brightgreen.svg)](Makefile)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
 **Status**: Multiplayer & Tmux Integration Complete ✅
 **Version**: 3.0 with Multiplayer, Tmux Dashboards & Team Building
-**Latest Update**: Nov 19, 2025
+**Latest Update**: Nov 2025
+
+---
+
+## Why Adventure Engine?
+
+| Feature | Traditional Games | Adventure Engine |
+|---------|-------------------|------------------|
+| **Team Building** | Requires specialized software | Built-in role-based collaborative gameplay |
+| **Deployment** | Complex installs, dependencies | Single binary, SSH-friendly, zero UI deps |
+| **Customization** | Scripting knowledge required | Simple `.world` text files anyone can write |
+| **Platform** | GUI-dependent | Pure terminal - works everywhere |
+| **Multiplayer** | Often requires servers | Tmux-based, local network ready |
+
+**Adventure Engine is for you if:**
+- You want collaborative team-building activities without complex software
+- You need terminal-based games that work over SSH
+- You want to create custom adventures without coding
+- You're building training scenarios for corporate environments
+- You appreciate clean, auditable C code
+
+---
+
+## Quick Start
+
+### Single-Player (30 seconds)
+
+```bash
+# Clone and build
+git clone https://github.com/jcaldwell-labs/adventure-engine-v2.git
+cd adventure-engine-v2
+make all
+
+# Play!
+make run
+```
+
+### Multiplayer Team Session (60 seconds)
+
+```bash
+# 1. Build everything
+make all
+
+# 2. Launch a 4-player campaign
+./bin/start-campaign intro_training 4
+
+# 3. Players join from separate terminals
+./bin/join-session SESS-XXXXXX-XXXX alice LEADER
+./bin/join-session SESS-XXXXXX-XXXX bob SCOUT
+./bin/join-session SESS-XXXXXX-XXXX carol ENGINEER
+./bin/join-session SESS-XXXXXX-XXXX dave MEDIC
+```
+
+See [docs/guides/QUICK-START-MULTIPLAYER.md](docs/guides/QUICK-START-MULTIPLAYER.md) for the full guide.
 
 ---
 
@@ -43,20 +101,10 @@ Adventure Engine v3.0 is a revolutionary **multiplayer text-based adventure plat
 
 ---
 
-## Quick Start - Multiplayer
+## Multiplayer Dashboard
 
-### 1. Build
-```bash
-make all
-```
+When you launch a campaign, you'll see a 4-panel tmux session:
 
-### 2. Launch Campaign
-```bash
-./bin/start-campaign intro_training 4
-```
-
-### 3. View Dashboard
-You'll see a 4-panel tmux session:
 ```
 ┌─────────────────┬──────────────┐
 │   NARRATIVE     │     MAP      │
@@ -66,16 +114,6 @@ You'll see a 4-panel tmux session:
 │   (health,inv)  │  (actions)   │
 └─────────────────┴──────────────┘
 ```
-
-### 4. Players Join (from separate terminals)
-```bash
-./bin/join-session SESS-20251119-143022-1234 alice LEADER
-./bin/join-session SESS-20251119-143022-1234 bob SCOUT
-./bin/join-session SESS-20251119-143022-1234 carol ENGINEER
-./bin/join-session SESS-20251119-143022-1234 dave MEDIC
-```
-
-**See [docs/QUICK-START-MULTIPLAYER.md](docs/QUICK-START-MULTIPLAYER.md) for details**
 
 ---
 
@@ -200,7 +238,7 @@ Adventure aboard a flying pirate ship in the clouds.
 
 ## Creating Your Own Worlds
 
-Worlds are defined in simple text files using the `.world` format. See [docs/WORLD-FORMAT.md](docs/WORLD-FORMAT.md) for complete documentation.
+Worlds are defined in simple text files using the `.world` format. See [docs/reference/WORLD-FORMAT.md](docs/reference/WORLD-FORMAT.md) for complete documentation.
 
 ### Quick Example
 
@@ -257,7 +295,9 @@ adventure-engine-v2/
 │   ├── crystal_caverns.world
 │   └── sky_pirates.world
 ├── docs/
-│   └── WORLD-FORMAT.md        # World file format spec
+│   ├── guides/                # User guides and tutorials
+│   ├── architecture/          # Technical deep-dives
+│   └── reference/             # Format specifications
 ├── build/                     # Build artifacts (generated)
 └── Makefile
 ```
@@ -401,7 +441,7 @@ Game loaded successfully!
 ### Community
 - Share your worlds in `worlds/` directory
 - Submit world files via pull requests
-- See [docs/WORLD-FORMAT.md](docs/WORLD-FORMAT.md) for format spec
+- See [docs/reference/WORLD-FORMAT.md](docs/reference/WORLD-FORMAT.md) for format spec
 
 ---
 

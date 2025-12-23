@@ -1,0 +1,71 @@
+# Adventure Engine v3.0
+
+> A C-based text adventure game engine with multiplayer team-building capabilities
+
+## Project Overview
+
+Adventure Engine is a modular text adventure game engine built in C (C11 standard) that supports both single-player and multiplayer gameplay. It features a clean architecture, smart terminal UI, flexible world scripting system, and collaborative gameplay mechanics.
+
+## Key Capabilities
+
+- Single-player text adventure engine with parser, world system, inventory
+- Multiplayer sessions (2-8 players) with tmux-based real-time dashboards
+- Role-based gameplay: LEADER, SCOUT, ENGINEER, MEDIC, DIPLOMAT, SPECIALIST
+- World file format (.world) for creating custom adventures without coding
+- Save/load system with multiple save slots
+- Smart terminal UI with scrolling, context-aware coloring, status bar
+- Named pipe IPC for real-time state synchronization
+
+## Technology Stack
+
+- Language: C (C11 standard)
+- Build System: Make
+- Dependencies: ncurses, readline, tmux
+- Test Framework: Custom test suite
+
+## Repository Structure
+
+```
+src/           - Core C source files
+include/       - Header files
+lib/           - External libraries (smartterm_simple)
+worlds/        - Example .world adventure files
+campaigns/     - Multiplayer campaign definitions
+realms/        - Multiplayer realm definitions
+tests/         - Test suite
+docs/          - Documentation
+  guides/      - User guides and tutorials
+  architecture/- Technical deep-dives
+  reference/   - Format specifications
+```
+
+## Quick Commands
+
+```bash
+make all              # Build everything
+make run              # Run single-player engine
+make run-tests        # Run test suite
+make run-coordinator  # Run multiplayer coordinator
+```
+
+## Documentation Entry Points
+
+- README.md - Main user documentation
+- CLAUDE.md - AI development guide
+- CONTRIBUTING.md - Contribution guidelines
+- docs/guides/QUICK-START-MULTIPLAYER.md - Multiplayer quickstart
+- docs/reference/WORLD-FORMAT.md - World file specification
+- docs/architecture/ARCHITECTURE.md - System architecture
+
+## For AI Agents
+
+When working with this codebase:
+1. Single-player engine is production-ready (v2.0 complete)
+2. Multiplayer infrastructure exists but integration is TODO
+3. All code compiles with -Wall -Wextra with zero warnings
+4. Run `make run-tests` to validate changes
+5. World files in `worlds/` provide examples of the .world format
+
+## Contact
+
+Repository: https://github.com/jcaldwell-labs/adventure-engine-v2
