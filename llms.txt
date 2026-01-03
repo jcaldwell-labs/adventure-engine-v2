@@ -214,11 +214,10 @@ See **CONTRIBUTING.md** for:
 
 ## Known Limitations
 
-1. Visited room state not persisted in saves (by design)
-2. Multiplayer infrastructure built but not integrated with game engine (in progress)
-3. Tab characters in commands not split by parser (use spaces)
-4. No NPC dialogue system (static world files)
-5. No puzzle mechanics (locks, keys, triggers not implemented yet)
+1. Multiplayer infrastructure built but not integrated with game engine (in progress)
+2. Tab characters in commands not split by parser (use spaces)
+3. No NPC dialogue system (static world files)
+4. No puzzle mechanics (locks, keys, triggers not implemented yet)
 
 ## Roadmap
 
