@@ -1,8 +1,25 @@
+// Security: Feature test macros must come BEFORE any system includes
+// Required for flock() file locking - cross-platform support
+
+// macOS: Need _DARWIN_C_SOURCE for BSD functions in C11 mode
+#ifdef __APPLE__
+#define _DARWIN_C_SOURCE
+#endif
+
+// Linux/BSD: Need _DEFAULT_SOURCE for BSD compatibility
+#ifndef _DEFAULT_SOURCE
+#define _DEFAULT_SOURCE
+#endif
+#ifndef _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE 200809L
+#endif
+
 #ifndef SESSION_H
 #define SESSION_H
 
 #include <time.h>
 #include <stdbool.h>
+#include <sys/file.h>  // For flock(), LOCK_EX, LOCK_SH, LOCK_UN
 
 #define MAX_SESSION_ID 64
 #define MAX_SESSION_NAME 128

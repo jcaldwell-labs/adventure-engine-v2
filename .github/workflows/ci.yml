@@ -2,9 +2,9 @@ name: CI Build and Test
 
 on:
   push:
-    branches: [ main, develop, claude/* ]
+    branches: [main, develop, claude/*]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 jobs:
   build-and-test:
@@ -19,148 +19,148 @@ jobs:
             gcc-version: 12
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Install dependencies (Ubuntu)
-      if: runner.os == 'Linux'
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          build-essential \
-          gcc-${{ matrix.gcc-version }} \
-          g++-${{ matrix.gcc-version }} \
-          libncurses-dev \
-          libreadline-dev \
-          valgrind
+      - name: Install dependencies (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            gcc-${{ matrix.gcc-version }} \
+            g++-${{ matrix.gcc-version }} \
+            libncurses-dev \
+            libreadline-dev \
+            valgrind
 
-    - name: Install dependencies (macOS)
-      if: runner.os == 'macOS'
-      run: |
-        brew install ncurses readline
+      - name: Install dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install ncurses readline
 
-    - name: Set GCC version (Ubuntu)
-      if: runner.os == 'Linux'
-      run: |
-        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${{ matrix.gcc-version }} 100
-        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-${{ matrix.gcc-version }} 100
-        gcc --version
+      - name: Set GCC version (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${{ matrix.gcc-version }} 100
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-${{ matrix.gcc-version }} 100
+          gcc --version
 
-    - name: Build all targets
-      run: |
-        make clean
-        make all
+      - name: Build all targets
+        run: |
+          make clean
+          make all
 
-    - name: Build test suite
-      run: |
-        make tests
+      - name: Build test suite
+        run: |
+          make tests
 
-    - name: Run tests
-      run: |
-        make run-tests
+      - name: Run tests
+        run: |
+          make run-tests
 
-    - name: Check for memory leaks (Ubuntu only)
-      if: runner.os == 'Linux'
-      run: |
-        # Run parser tests with valgrind
-        valgrind --leak-check=full --error-exitcode=1 --quiet \
-          ./build/test_parser || echo "Parser tests completed"
+      - name: Check for memory leaks (Ubuntu only)
+        if: runner.os == 'Linux'
+        run: |
+          # Run parser tests with valgrind
+          valgrind --leak-check=full --error-exitcode=1 --quiet \
+            ./build/test_parser || echo "Parser tests completed"
 
-        # Run world tests with valgrind
-        valgrind --leak-check=full --error-exitcode=1 --quiet \
-          ./build/test_world || echo "World tests completed"
+          # Run world tests with valgrind
+          valgrind --leak-check=full --error-exitcode=1 --quiet \
+            ./build/test_world || echo "World tests completed"
 
-        # Run save/load tests with valgrind
-        valgrind --leak-check=full --error-exitcode=1 --quiet \
-          ./build/test_save_load || echo "Save/Load tests completed"
+          # Run save/load tests with valgrind
+          valgrind --leak-check=full --error-exitcode=1 --quiet \
+            ./build/test_save_load || echo "Save/Load tests completed"
 
-    - name: Verify build artifacts
-      run: |
-        test -f build/adventure-engine || (echo "adventure-engine binary missing" && exit 1)
-        test -f build/session-coordinator || (echo "session-coordinator binary missing" && exit 1)
-        test -f build/test_parser || (echo "test_parser binary missing" && exit 1)
-        test -f build/test_world || (echo "test_world binary missing" && exit 1)
-        test -f build/test_save_load || (echo "test_save_load binary missing" && exit 1)
-        echo "All binaries built successfully"
+      - name: Verify build artifacts
+        run: |
+          test -f build/adventure-engine || (echo "adventure-engine binary missing" && exit 1)
+          test -f build/session-coordinator || (echo "session-coordinator binary missing" && exit 1)
+          test -f build/test_parser || (echo "test_parser binary missing" && exit 1)
+          test -f build/test_world || (echo "test_world binary missing" && exit 1)
+          test -f build/test_save_load || (echo "test_save_load binary missing" && exit 1)
+          echo "All binaries built successfully"
 
-    - name: Test world loading
-      run: |
-        # Test that example worlds can be loaded
-        echo "Testing world loading..."
-        ls -la worlds/
-        echo "World files verified"
+      - name: Test world loading
+        run: |
+          # Test that example worlds can be loaded
+          echo "Testing world loading..."
+          ls -la worlds/
+          echo "World files verified"
 
-    - name: Check code warnings
-      run: |
-        make clean
-        make all 2>&1 | tee build.log
-        # Fail if there are any warnings
-        if grep -i "warning:" build.log; then
-          echo "Build produced warnings - please fix"
-          exit 1
-        fi
-        echo "Build completed with no warnings"
+      - name: Check code warnings
+        run: |
+          make clean
+          make all 2>&1 | tee build.log
+          # Fail if there are any warnings
+          if grep -i "warning:" build.log; then
+            echo "Build produced warnings - please fix"
+            exit 1
+          fi
+          echo "Build completed with no warnings"
 
   code-quality:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y cppcheck cloc
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cppcheck cloc
 
-    - name: Run cppcheck
-      run: |
-        cppcheck --enable=warning,style,performance,portability \
-          --std=c11 \
-          --suppress=missingIncludeSystem \
-          -I include/ \
-          src/ lib/ 2>&1 | tee cppcheck.log
+      - name: Run cppcheck
+        run: |
+          cppcheck --enable=warning,style,performance,portability \
+            --std=c11 \
+            --suppress=missingIncludeSystem \
+            -I include/ \
+            src/ lib/ 2>&1 | tee cppcheck.log
 
-        # Don't fail on cppcheck warnings, just report them
-        echo "Static analysis complete"
+          # Don't fail on cppcheck warnings, just report them
+          echo "Static analysis complete"
 
-    - name: Count lines of code
-      run: |
-        echo "=== Code Statistics ==="
-        cloc src/ include/ lib/ tests/
-        echo "======================="
+      - name: Count lines of code
+        run: |
+          echo "=== Code Statistics ==="
+          cloc src/ include/ lib/ tests/
+          echo "======================="
 
-    - name: Check for TODOs
-      run: |
-        echo "=== TODO/FIXME Comments ==="
-        grep -rn "TODO\|FIXME" src/ include/ || echo "No TODOs found"
-        echo "==========================="
+      - name: Check for TODOs
+        run: |
+          echo "=== TODO/FIXME Comments ==="
+          grep -rn "TODO\|FIXME" src/ include/ || echo "No TODOs found"
+          echo "==========================="
 
   documentation:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Check documentation files exist
-      run: |
-        test -f README.md || (echo "README.md missing" && exit 1)
-        test -f CLAUDE.md || (echo "CLAUDE.md missing" && exit 1)
-        test -f CONTRIBUTING.md || (echo "CONTRIBUTING.md missing" && exit 1)
-        test -f docs/WORLD-FORMAT.md || (echo "WORLD-FORMAT.md missing" && exit 1)
-        test -f docs/ARCHITECTURE.md || (echo "ARCHITECTURE.md missing" && exit 1)
-        test -f docs/TROUBLESHOOTING.md || (echo "TROUBLESHOOTING.md missing" && exit 1)
-        echo "All required documentation files present"
+      - name: Check documentation files exist
+        run: |
+          test -f README.md || (echo "README.md missing" && exit 1)
+          test -f CLAUDE.md || (echo "CLAUDE.md missing" && exit 1)
+          test -f CONTRIBUTING.md || (echo "CONTRIBUTING.md missing" && exit 1)
+          test -f docs/reference/WORLD-FORMAT.md || (echo "WORLD-FORMAT.md missing" && exit 1)
+          test -f docs/architecture/ARCHITECTURE.md || (echo "ARCHITECTURE.md missing" && exit 1)
+          test -f docs/guides/TROUBLESHOOTING.md || (echo "TROUBLESHOOTING.md missing" && exit 1)
+          echo "All required documentation files present"
 
-    - name: Check Makefile help
-      run: |
-        make help
+      - name: Check Makefile help
+        run: |
+          make help
 
-    - name: Verify world files
-      run: |
-        test -f worlds/dark_tower.world || (echo "dark_tower.world missing" && exit 1)
-        test -f worlds/haunted_mansion.world || (echo "haunted_mansion.world missing" && exit 1)
-        test -f worlds/crystal_caverns.world || (echo "crystal_caverns.world missing" && exit 1)
-        test -f worlds/sky_pirates.world || (echo "sky_pirates.world missing" && exit 1)
-        echo "All example worlds present"
+      - name: Verify world files
+        run: |
+          test -f worlds/dark_tower.world || (echo "dark_tower.world missing" && exit 1)
+          test -f worlds/haunted_mansion.world || (echo "haunted_mansion.world missing" && exit 1)
+          test -f worlds/crystal_caverns.world || (echo "crystal_caverns.world missing" && exit 1)
+          test -f worlds/sky_pirates.world || (echo "sky_pirates.world missing" && exit 1)
+          echo "All example worlds present"

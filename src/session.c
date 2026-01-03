@@ -1,6 +1,4 @@
-// Security: POSIX features required for fileno() and flock()
-#define _POSIX_C_SOURCE 200809L
-
+// Note: Feature test macros and <sys/file.h> are in session.h for portability
 #include "session.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,7 +6,6 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <sys/file.h>  // Security: Added for flock() file locking
 
 #define SESSION_DIR "/tmp/adventure-sessions"
 #define REGISTRY_FILE "/tmp/adventure-sessions/registry.dat"
