@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <unistd.h>
+#include <ctype.h>
 #include "save_load.h"
 
 #define SAVE_DIR_NAME ".adventure-saves"
@@ -41,6 +42,37 @@ static bool ensure_save_dir(void) {
     return true;
 }
 
+bool is_safe_filename(const char *filename) {
+    if (!filename || filename[0] == '\0') {
+        return false;
+    }
+
+    // Reject if too long (reasonable filename limit)
+    if (strlen(filename) > 64) {
+        return false;
+    }
+
+    // Check each character
+    for (const char *p = filename; *p != '\0'; p++) {
+        // Allow only: alphanumeric, underscore, hyphen
+        if (!isalnum((unsigned char)*p) && *p != '_' && *p != '-') {
+            return false;
+        }
+    }
+
+    // Reject directory traversal patterns
+    if (strstr(filename, "..") != NULL) {
+        return false;
+    }
+
+    // Reject absolute paths
+    if (filename[0] == '/' || filename[0] == '\\') {
+        return false;
+    }
+
+    return true;
+}
+
 void get_save_path(const char *slot_name, char *buffer, size_t buffer_size) {
     char save_dir[512];
     get_save_dir(save_dir, sizeof(save_dir));
@@ -56,6 +88,12 @@ bool save_exists(const char *slot_name) {
 }
 
 bool game_save(const World *world, const char *slot_name, const char *world_name) {
+    // Validate slot_name to prevent path traversal
+    if (!is_safe_filename(slot_name)) {
+        fprintf(stderr, "Error: Invalid save slot name '%s'. Only alphanumeric, underscore, and hyphen allowed.\n", slot_name);
+        return false;
+    }
+
     if (!ensure_save_dir()) {
         return false;
     }
@@ -117,6 +155,12 @@ bool game_save(const World *world, const char *slot_name, const char *world_name
 }
 
 bool game_load(World *world, const char *slot_name, char *world_name, size_t world_name_size) {
+    // Validate slot_name to prevent path traversal
+    if (!is_safe_filename(slot_name)) {
+        fprintf(stderr, "Error: Invalid save slot name '%s'. Only alphanumeric, underscore, and hyphen allowed.\n", slot_name);
+        return false;
+    }
+
     char path[512];
     get_save_path(slot_name, path, sizeof(path));
 
@@ -289,6 +333,12 @@ int game_list_saves(char saves[][64], int max_saves) {
 }
 
 bool game_delete_save(const char *slot_name) {
+    // Validate slot_name to prevent path traversal
+    if (!is_safe_filename(slot_name)) {
+        fprintf(stderr, "Error: Invalid save slot name '%s'. Only alphanumeric, underscore, and hyphen allowed.\n", slot_name);
+        return false;
+    }
+
     char path[512];
     get_save_path(slot_name, path, sizeof(path));
 

@@ -36,4 +36,8 @@ void get_save_path(const char *slot_name, char *buffer, size_t buffer_size);
 // Check if a save slot exists
 bool save_exists(const char *slot_name);
 
+// Validate filename to prevent path traversal attacks
+// Returns true if filename is safe (alphanumeric, underscore, hyphen only)
+bool is_safe_filename(const char *filename);
+
 #endif // SAVE_LOAD_H

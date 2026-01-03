@@ -167,6 +167,16 @@ int main(int argc, char *argv[]) {
             world_file[sizeof(world_file) - 1] = '\0';
         }
 
+        // Validate world file name to prevent path traversal
+        if (!is_safe_filename(world_file)) {
+            st_add_output("", ST_CTX_NORMAL);
+            st_add_output("ERROR: Invalid world file name. Only alphanumeric, underscore, and hyphen allowed.", ST_CTX_NORMAL);
+            st_add_output("", ST_CTX_NORMAL);
+            st_render();
+            st_cleanup();
+            return 1;
+        }
+
         // Build full path
         char full_path[512];
         snprintf(full_path, sizeof(full_path), "worlds/%s.world", world_file);
