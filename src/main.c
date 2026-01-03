@@ -149,11 +149,33 @@ int main(int argc, char *argv[]) {
 
     // Load world from file if not loaded from save
     if (!loaded_from_save) {
-        // Map number to world name
-        if (strcmp(world_file, "1") == 0) strcpy(world_file, "dark_tower");
-        else if (strcmp(world_file, "2") == 0) strcpy(world_file, "haunted_mansion");
-        else if (strcmp(world_file, "3") == 0) strcpy(world_file, "crystal_caverns");
-        else if (strcmp(world_file, "4") == 0) strcpy(world_file, "sky_pirates");
+        // Map number to world name (using strncpy for safety)
+        if (strcmp(world_file, "1") == 0) {
+            strncpy(world_file, "dark_tower", sizeof(world_file) - 1);
+            world_file[sizeof(world_file) - 1] = '\0';
+        }
+        else if (strcmp(world_file, "2") == 0) {
+            strncpy(world_file, "haunted_mansion", sizeof(world_file) - 1);
+            world_file[sizeof(world_file) - 1] = '\0';
+        }
+        else if (strcmp(world_file, "3") == 0) {
+            strncpy(world_file, "crystal_caverns", sizeof(world_file) - 1);
+            world_file[sizeof(world_file) - 1] = '\0';
+        }
+        else if (strcmp(world_file, "4") == 0) {
+            strncpy(world_file, "sky_pirates", sizeof(world_file) - 1);
+            world_file[sizeof(world_file) - 1] = '\0';
+        }
+
+        // Validate world file name to prevent path traversal
+        if (!is_safe_filename(world_file)) {
+            st_add_output("", ST_CTX_NORMAL);
+            st_add_output("ERROR: Invalid world file name. Only alphanumeric, underscore, and hyphen allowed.", ST_CTX_NORMAL);
+            st_add_output("", ST_CTX_NORMAL);
+            st_render();
+            st_cleanup();
+            return 1;
+        }
 
         // Build full path
         char full_path[512];
@@ -303,17 +325,29 @@ void cmd_look(World *world) {
     st_add_output(room->description, ST_CTX_NORMAL);
 
     // Show exits
-    char exits_buf[256] = "Exits: ";
+    char exits_buf[256];
+    size_t buf_len = sizeof(exits_buf);
+    size_t offset = 0;
+
+    // Start with "Exits: "
+    offset = snprintf(exits_buf, buf_len, "Exits: ");
+
     int exit_count = 0;
     for (int i = 0; i < DIR_COUNT; i++) {
         if (room->exits[i] != -1) {
-            if (exit_count > 0) strcat(exits_buf, ", ");
-            strcat(exits_buf, direction_to_str((Direction)i));
+            // Add comma separator if not first exit
+            if (exit_count > 0 && offset < buf_len) {
+                offset += snprintf(exits_buf + offset, buf_len - offset, ", ");
+            }
+            // Add direction string with bounds checking
+            if (offset < buf_len) {
+                offset += snprintf(exits_buf + offset, buf_len - offset, "%s", direction_to_str((Direction)i));
+            }
             exit_count++;
         }
     }
-    if (exit_count == 0) {
-        strcat(exits_buf, "none");
+    if (exit_count == 0 && offset < buf_len) {
+        snprintf(exits_buf + offset, buf_len - offset, "none");
     }
     st_add_output(exits_buf, ST_CTX_COMMENT);
 

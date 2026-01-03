@@ -1,3 +1,6 @@
+// Security: POSIX features required for fileno() and flock()
+#define _POSIX_C_SOURCE 200809L
+
 #include "session.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -5,6 +8,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/file.h>  // Security: Added for flock() file locking
 
 #define SESSION_DIR "/tmp/adventure-sessions"
 #define REGISTRY_FILE "/tmp/adventure-sessions/registry.dat"
@@ -65,7 +69,9 @@ Session* session_create(const char* campaign_name, const char* gm_name,
     session_generate_id(session->id, MAX_SESSION_ID);
 
     // Set basic info
+    // Security: Ensure null termination after all strncpy calls
     strncpy(session->campaign_name, campaign_name, MAX_SESSION_NAME - 1);
+    session->campaign_name[MAX_SESSION_NAME - 1] = '\0';
     strncpy(session->gm_name, gm_name, MAX_GM_NAME - 1);
     session->gm_name[MAX_GM_NAME - 1] = '\0';
 
@@ -259,18 +265,27 @@ bool session_load(Session* session, const char* session_id) {
     }
 
     char line[512];
-    char key[128], value[384];
+    // Security: Initialize buffers to prevent use of uninitialized data
+    char key[128] = {0};
+    char value[384] = {0};
 
     while (fgets(line, sizeof(line), fp)) {
         if (line[0] == '[' || line[0] == '\n') {
             continue;
         }
 
+        // Security: Reset buffers before each sscanf to prevent stale data
+        key[0] = '\0';
+        value[0] = '\0';
+
         if (sscanf(line, "%127[^:]: %383[^\n]", key, value) == 2) {
+            // Security: Ensure null termination after all strncpy calls
             if (strcmp(key, "id") == 0) {
                 strncpy(session->id, value, MAX_SESSION_ID - 1);
+                session->id[MAX_SESSION_ID - 1] = '\0';
             } else if (strcmp(key, "campaign") == 0) {
                 strncpy(session->campaign_name, value, MAX_SESSION_NAME - 1);
+                session->campaign_name[MAX_SESSION_NAME - 1] = '\0';
             } else if (strcmp(key, "gm") == 0) {
                 strncpy(session->gm_name, value, MAX_GM_NAME - 1);
                 session->gm_name[MAX_GM_NAME - 1] = '\0';
@@ -464,6 +479,15 @@ bool registry_save(const SessionRegistry* registry) {
         return false;
     }
 
+    // Security: Acquire exclusive lock to prevent race conditions
+    // during multiplayer registry access
+    int fd = fileno(fp);
+    if (flock(fd, LOCK_EX) != 0) {
+        perror("Security: Failed to acquire registry lock");
+        fclose(fp);
+        return false;
+    }
+
     size_t written = 0;
     written += fwrite(&registry->session_count, sizeof(int), 1, fp);
     written += fwrite(&registry->last_cleanup, sizeof(time_t), 1, fp);
@@ -471,10 +495,14 @@ bool registry_save(const SessionRegistry* registry) {
 
     if (written != (size_t)(2 + registry->session_count)) {
         fprintf(stderr, "Failed to write complete registry data\n");
+        flock(fd, LOCK_UN);  // Release lock
         fclose(fp);
         return false;
     }
 
+    // Security: Ensure data is flushed before releasing lock
+    fflush(fp);
+    flock(fd, LOCK_UN);  // Release lock
     fclose(fp);
     return true;
 }
@@ -490,25 +518,59 @@ bool registry_load(SessionRegistry* registry) {
         return false;  // No registry file exists yet
     }
 
-    size_t read = 0;
-    read += fread(&registry->session_count, sizeof(int), 1, fp);
-    read += fread(&registry->last_cleanup, sizeof(time_t), 1, fp);
-
-    // Validate session count before reading sessions
-    if (registry->session_count < 0 || registry->session_count > MAX_SESSIONS) {
-        fprintf(stderr, "Invalid session count in registry: %d\n", registry->session_count);
+    // Security: Acquire shared lock to prevent reading during writes
+    int fd = fileno(fp);
+    if (flock(fd, LOCK_SH) != 0) {
+        perror("Security: Failed to acquire registry read lock");
         fclose(fp);
         return false;
     }
 
-    read += fread(registry->sessions, sizeof(Session), registry->session_count, fp);
-
-    if (read != (size_t)(2 + registry->session_count)) {
-        fprintf(stderr, "Failed to read complete registry data\n");
+    // Security: Read session_count into temporary variable and validate
+    int temp_count = 0;
+    size_t read = fread(&temp_count, sizeof(int), 1, fp);
+    if (read != 1) {
+        fprintf(stderr, "Security: Failed to read session count from registry\n");
+        flock(fd, LOCK_UN);
         fclose(fp);
         return false;
     }
 
+    // Security: Validate session count range to prevent buffer overflow
+    if (temp_count < 0 || temp_count > MAX_SESSIONS) {
+        fprintf(stderr, "Security: Invalid session count in registry: %d (max: %d)\n",
+                temp_count, MAX_SESSIONS);
+        flock(fd, LOCK_UN);
+        fclose(fp);
+        return false;
+    }
+
+    registry->session_count = temp_count;
+
+    // Read last_cleanup timestamp
+    if (fread(&registry->last_cleanup, sizeof(time_t), 1, fp) != 1) {
+        fprintf(stderr, "Security: Failed to read last_cleanup from registry\n");
+        registry->session_count = 0;  // Reset to safe state
+        flock(fd, LOCK_UN);
+        fclose(fp);
+        return false;
+    }
+
+    // Security: Read sessions with validated count
+    if (registry->session_count > 0) {
+        size_t sessions_read = fread(registry->sessions, sizeof(Session),
+                                      registry->session_count, fp);
+        if (sessions_read != (size_t)registry->session_count) {
+            fprintf(stderr, "Security: Failed to read session data (got %zu, expected %d)\n",
+                    sessions_read, registry->session_count);
+            registry->session_count = 0;  // Reset to safe state
+            flock(fd, LOCK_UN);
+            fclose(fp);
+            return false;
+        }
+    }
+
+    flock(fd, LOCK_UN);  // Release lock
     fclose(fp);
     return true;
 }

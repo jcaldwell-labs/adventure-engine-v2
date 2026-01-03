@@ -349,6 +349,56 @@ Play it:
 
 ---
 
+## Code Quality & Security
+
+### Testing
+
+```bash
+# Build and run all tests
+make run-tests
+
+# Build with AddressSanitizer for memory safety checks
+make DEBUG=1 all
+make DEBUG=1 run-tests
+```
+
+**Test Coverage:**
+- Parser tests: 7/8 passing
+- World tests: 11/11 passing
+- Save/Load tests: 7/7 passing
+- Path traversal: 16/16 passing
+- Security tests: 8/8 passing
+
+### Automated Code Review
+
+```bash
+# Quick review (code quality + security)
+make review
+
+# Security audit only
+make security-audit
+
+# Full review (all agents)
+make full-review
+
+# C memory safety analysis
+make memory-audit
+```
+
+Review reports are saved to `state/reviews/YYYY-MM-DD/`.
+
+### Security
+
+This project has undergone comprehensive memory safety auditing:
+
+- **Issue #14**: Fixed buffer overflow in `cmd_look()`
+- **Issue #15**: Fixed path traversal vulnerability
+- **Issue #16**: Complete memory safety audit (8 critical fixes)
+
+All code is tested with `-fsanitize=address,undefined` to detect memory errors.
+
+---
+
 ## 🤝 Community & Contributing
 
 ### We Welcome Contributions!

@@ -278,29 +278,38 @@ bool world_load_from_file(World *world, const char *filename, LoadError *error) 
         }
 
         // Handle property based on current section
+        // Security: Ensure null termination after all strncpy calls
         if (strcmp(current_section, "WORLD") == 0) {
             if (strcmp(key, "name") == 0) {
                 strncpy(world_name, value, sizeof(world_name) - 1);
+                world_name[sizeof(world_name) - 1] = '\0';
             } else if (strcmp(key, "start") == 0) {
                 strncpy(world_start, value, sizeof(world_start) - 1);
+                world_start[sizeof(world_start) - 1] = '\0';
             }
         } else if (strcmp(current_section, "ROOM") == 0) {
             if (strcmp(key, "name") == 0) {
                 strncpy(prop_name, value, sizeof(prop_name) - 1);
+                prop_name[sizeof(prop_name) - 1] = '\0';
             } else if (strcmp(key, "description") == 0) {
                 strncpy(prop_description, value, sizeof(prop_description) - 1);
+                prop_description[sizeof(prop_description) - 1] = '\0';
             } else if (strcmp(key, "exits") == 0) {
                 strncpy(prop_exits, value, sizeof(prop_exits) - 1);
+                prop_exits[sizeof(prop_exits) - 1] = '\0';
             }
         } else if (strcmp(current_section, "ITEM") == 0) {
             if (strcmp(key, "name") == 0) {
                 strncpy(prop_name, value, sizeof(prop_name) - 1);
+                prop_name[sizeof(prop_name) - 1] = '\0';
             } else if (strcmp(key, "description") == 0) {
                 strncpy(prop_description, value, sizeof(prop_description) - 1);
+                prop_description[sizeof(prop_description) - 1] = '\0';
             } else if (strcmp(key, "takeable") == 0) {
                 prop_takeable = parse_bool(value);
             } else if (strcmp(key, "location") == 0) {
                 strncpy(prop_location, value, sizeof(prop_location) - 1);
+                prop_location[sizeof(prop_location) - 1] = '\0';
             }
         }
     }

@@ -5,6 +5,12 @@ CC = gcc
 CFLAGS = -Wall -Wextra -std=c11 -Iinclude
 LDFLAGS = -lncurses -lreadline
 
+# Debug build with AddressSanitizer (use: make DEBUG=1)
+ifdef DEBUG
+	CFLAGS += -g -fsanitize=address,undefined -fno-omit-frame-pointer
+	LDFLAGS += -fsanitize=address,undefined
+endif
+
 # Directories
 SRC_DIR = src
 LIB_DIR = lib
@@ -35,8 +41,10 @@ TEST_SMARTTERM = $(BUILD_DIR)/test_smartterm
 TEST_PARSER = $(BUILD_DIR)/test_parser
 TEST_WORLD = $(BUILD_DIR)/test_world
 TEST_SAVE_LOAD = $(BUILD_DIR)/test_save_load
+TEST_PATH_TRAVERSAL = $(BUILD_DIR)/test_path_traversal
+TEST_SECURITY = $(BUILD_DIR)/test_security
 
-.PHONY: all clean lib engine multiplayer test tests run run-test run-coordinator run-tests
+.PHONY: all clean lib engine multiplayer test tests run run-test run-coordinator run-tests debug
 
 all: lib engine multiplayer
 
@@ -56,7 +64,7 @@ $(LIB_OBJ): $(LIB_SRC) $(INCLUDE_DIR)/smartterm_simple.h | $(BUILD_DIR)
 # Build test programs
 test: tests
 
-tests: $(TEST_PARSER) $(TEST_WORLD) $(TEST_SAVE_LOAD)
+tests: $(TEST_PARSER) $(TEST_WORLD) $(TEST_SAVE_LOAD) $(TEST_PATH_TRAVERSAL) $(TEST_SECURITY)
 
 # Parser tests
 $(TEST_PARSER): $(TEST_DIR)/test_parser.c $(BUILD_DIR)/parser.o | $(BUILD_DIR)
@@ -68,6 +76,14 @@ $(TEST_WORLD): $(TEST_DIR)/test_world.c $(BUILD_DIR)/world.o | $(BUILD_DIR)
 
 # Save/Load tests
 $(TEST_SAVE_LOAD): $(TEST_DIR)/test_save_load.c $(BUILD_DIR)/world.o $(BUILD_DIR)/save_load.o $(BUILD_DIR)/world_loader.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+
+# Path traversal protection tests
+$(TEST_PATH_TRAVERSAL): $(TEST_DIR)/test_path_traversal.c $(BUILD_DIR)/save_load.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+
+# Security tests (Issue #16 fixes)
+$(TEST_SECURITY): $(TEST_DIR)/test_security.c $(BUILD_DIR)/player.o $(BUILD_DIR)/session.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
 # Build adventure engine
@@ -98,6 +114,12 @@ run-test: tests
 	@echo ""
 	@echo "Running Save/Load Tests..."
 	@$(TEST_SAVE_LOAD) || true
+	@echo ""
+	@echo "Running Path Traversal Protection Tests..."
+	@$(TEST_PATH_TRAVERSAL) || true
+	@echo ""
+	@echo "Running Security Tests (Issue #16 fixes)..."
+	@$(TEST_SECURITY) || true
 
 run-tests: run-test
 
@@ -107,6 +129,21 @@ run-coordinator: multiplayer
 # Clean
 clean:
 	rm -rf $(BUILD_DIR)
+
+# Code quality targets
+.PHONY: review security-audit
+
+review:
+	@./scripts/code-review.sh --quick
+
+security-audit:
+	@./scripts/code-review.sh --security
+
+full-review:
+	@./scripts/code-review.sh --full
+
+memory-audit:
+	@./scripts/code-review.sh --memory
 
 # Help
 help:
@@ -123,4 +160,15 @@ help:
 	@echo "  run-test         - Build and run all tests"
 	@echo "  run-tests        - Alias for run-test"
 	@echo "  clean            - Remove build artifacts"
+	@echo "  debug            - Build with AddressSanitizer (use: make DEBUG=1)"
 	@echo "  help             - Show this help"
+	@echo ""
+	@echo "Code Quality:"
+	@echo "  review           - Quick code review (quality + security)"
+	@echo "  security-audit   - Security-focused review only"
+	@echo "  full-review      - Complete review (all agents)"
+	@echo "  memory-audit     - C memory safety analysis"
+	@echo ""
+	@echo "Debug mode:"
+	@echo "  make DEBUG=1 all - Build all with AddressSanitizer"
+	@echo "  make DEBUG=1 run - Run engine with memory safety checks"
