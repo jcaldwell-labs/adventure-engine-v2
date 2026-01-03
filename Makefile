@@ -5,6 +5,12 @@ CC = gcc
 CFLAGS = -Wall -Wextra -std=c11 -Iinclude
 LDFLAGS = -lncurses -lreadline
 
+# Debug build with AddressSanitizer (use: make DEBUG=1)
+ifdef DEBUG
+	CFLAGS += -g -fsanitize=address,undefined -fno-omit-frame-pointer
+	LDFLAGS += -fsanitize=address,undefined
+endif
+
 # Directories
 SRC_DIR = src
 LIB_DIR = lib
@@ -36,7 +42,7 @@ TEST_PARSER = $(BUILD_DIR)/test_parser
 TEST_WORLD = $(BUILD_DIR)/test_world
 TEST_SAVE_LOAD = $(BUILD_DIR)/test_save_load
 
-.PHONY: all clean lib engine multiplayer test tests run run-test run-coordinator run-tests
+.PHONY: all clean lib engine multiplayer test tests run run-test run-coordinator run-tests debug
 
 all: lib engine multiplayer
 
@@ -123,4 +129,9 @@ help:
 	@echo "  run-test         - Build and run all tests"
 	@echo "  run-tests        - Alias for run-test"
 	@echo "  clean            - Remove build artifacts"
+	@echo "  debug            - Build with AddressSanitizer (use: make DEBUG=1)"
 	@echo "  help             - Show this help"
+	@echo ""
+	@echo "Debug mode:"
+	@echo "  make DEBUG=1 all - Build all with AddressSanitizer"
+	@echo "  make DEBUG=1 run - Run engine with memory safety checks"
