@@ -1,5 +1,12 @@
 // Security: Feature test macros must come BEFORE any system includes
-// Required for flock() file locking - use _DEFAULT_SOURCE for BSD compatibility
+// Required for flock() file locking - cross-platform support
+
+// macOS: Need _DARWIN_C_SOURCE for BSD functions in C11 mode
+#ifdef __APPLE__
+#define _DARWIN_C_SOURCE
+#endif
+
+// Linux/BSD: Need _DEFAULT_SOURCE for BSD compatibility
 #ifndef _DEFAULT_SOURCE
 #define _DEFAULT_SOURCE
 #endif
