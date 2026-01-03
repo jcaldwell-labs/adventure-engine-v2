@@ -1,5 +1,8 @@
 // Security: Feature test macros must come BEFORE any system includes
-// Required for flock() file locking on POSIX systems
+// Required for flock() file locking - use _DEFAULT_SOURCE for BSD compatibility
+#ifndef _DEFAULT_SOURCE
+#define _DEFAULT_SOURCE
+#endif
 #ifndef _POSIX_C_SOURCE
 #define _POSIX_C_SOURCE 200809L
 #endif
@@ -9,6 +12,7 @@
 
 #include <time.h>
 #include <stdbool.h>
+#include <sys/file.h>  // For flock(), LOCK_EX, LOCK_SH, LOCK_UN
 
 #define MAX_SESSION_ID 64
 #define MAX_SESSION_NAME 128
