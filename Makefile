@@ -42,6 +42,7 @@ TEST_PARSER = $(BUILD_DIR)/test_parser
 TEST_WORLD = $(BUILD_DIR)/test_world
 TEST_SAVE_LOAD = $(BUILD_DIR)/test_save_load
 TEST_PATH_TRAVERSAL = $(BUILD_DIR)/test_path_traversal
+TEST_SECURITY = $(BUILD_DIR)/test_security
 
 .PHONY: all clean lib engine multiplayer test tests run run-test run-coordinator run-tests debug
 
@@ -63,7 +64,7 @@ $(LIB_OBJ): $(LIB_SRC) $(INCLUDE_DIR)/smartterm_simple.h | $(BUILD_DIR)
 # Build test programs
 test: tests
 
-tests: $(TEST_PARSER) $(TEST_WORLD) $(TEST_SAVE_LOAD) $(TEST_PATH_TRAVERSAL)
+tests: $(TEST_PARSER) $(TEST_WORLD) $(TEST_SAVE_LOAD) $(TEST_PATH_TRAVERSAL) $(TEST_SECURITY)
 
 # Parser tests
 $(TEST_PARSER): $(TEST_DIR)/test_parser.c $(BUILD_DIR)/parser.o | $(BUILD_DIR)
@@ -79,6 +80,10 @@ $(TEST_SAVE_LOAD): $(TEST_DIR)/test_save_load.c $(BUILD_DIR)/world.o $(BUILD_DIR
 
 # Path traversal protection tests
 $(TEST_PATH_TRAVERSAL): $(TEST_DIR)/test_path_traversal.c $(BUILD_DIR)/save_load.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+
+# Security tests (Issue #16 fixes)
+$(TEST_SECURITY): $(TEST_DIR)/test_security.c $(BUILD_DIR)/player.o $(BUILD_DIR)/session.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
 # Build adventure engine
@@ -112,6 +117,9 @@ run-test: tests
 	@echo ""
 	@echo "Running Path Traversal Protection Tests..."
 	@$(TEST_PATH_TRAVERSAL) || true
+	@echo ""
+	@echo "Running Security Tests (Issue #16 fixes)..."
+	@$(TEST_SECURITY) || true
 
 run-tests: run-test
 

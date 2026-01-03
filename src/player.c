@@ -242,16 +242,25 @@ bool player_load(Player* player, const char* session_id, const char* username) {
     }
 
     char line[256];
-    char key[64], value[192];
+    // Security: Initialize buffers to prevent use of uninitialized data
+    char key[64] = {0};
+    char value[192] = {0};
 
     while (fgets(line, sizeof(line), fp)) {
         if (line[0] == '[' || line[0] == '\n') continue;
 
+        // Security: Reset buffers before each sscanf to prevent stale data
+        key[0] = '\0';
+        value[0] = '\0';
+
         if (sscanf(line, "%63[^:]: %191[^\n]", key, value) == 2) {
+            // Security: Ensure null termination after strncpy
             if (strcmp(key, "username") == 0) {
                 strncpy(player->username, value, MAX_USERNAME - 1);
+                player->username[MAX_USERNAME - 1] = '\0';
             } else if (strcmp(key, "session") == 0) {
                 strncpy(player->session_id, value, 63);
+                player->session_id[63] = '\0';
             } else if (strcmp(key, "number") == 0) {
                 player->player_number = atoi(value);
             } else if (strcmp(key, "role") == 0) {
@@ -464,8 +473,38 @@ bool player_registry_load(PlayerRegistry* registry, const char* session_id) {
         return false;
     }
 
-    fread(&registry->player_count, sizeof(int), 1, fp);
-    fread(registry->players, sizeof(Player), registry->player_count, fp);
+    // Security: Read player_count and validate before using
+    int temp_count = 0;
+    size_t read_count = fread(&temp_count, sizeof(int), 1, fp);
+    if (read_count != 1) {
+        fprintf(stderr, "Security: Failed to read player count from registry\n");
+        fclose(fp);
+        return false;
+    }
+
+    // Security: Validate player_count range to prevent integer overflow
+    // and buffer overflow when reading player array
+    if (temp_count < 0 || temp_count > MAX_PLAYERS) {
+        fprintf(stderr, "Security: Invalid player count %d (max: %d)\n",
+                temp_count, MAX_PLAYERS);
+        fclose(fp);
+        return false;
+    }
+
+    registry->player_count = temp_count;
+
+    // Security: Check fread return value to prevent memory corruption
+    if (registry->player_count > 0) {
+        size_t players_read = fread(registry->players, sizeof(Player),
+                                    registry->player_count, fp);
+        if (players_read != (size_t)registry->player_count) {
+            fprintf(stderr, "Security: Failed to read player data (got %zu, expected %d)\n",
+                    players_read, registry->player_count);
+            registry->player_count = 0;  // Reset to safe state
+            fclose(fp);
+            return false;
+        }
+    }
 
     fclose(fp);
 
