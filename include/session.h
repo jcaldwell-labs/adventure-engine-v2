@@ -1,3 +1,9 @@
+// Security: Feature test macros must come BEFORE any system includes
+// Required for flock() file locking on POSIX systems
+#ifndef _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE 200809L
+#endif
+
 #ifndef SESSION_H
 #define SESSION_H
 

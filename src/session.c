@@ -1,6 +1,4 @@
-// Security: POSIX features required for fileno() and flock()
-#define _POSIX_C_SOURCE 200809L
-
+// Note: _POSIX_C_SOURCE is defined in session.h for portability
 #include "session.h"
 #include <stdio.h>
 #include <stdlib.h>
