@@ -130,6 +130,21 @@ run-coordinator: multiplayer
 clean:
 	rm -rf $(BUILD_DIR)
 
+# Code quality targets
+.PHONY: review security-audit
+
+review:
+	@./scripts/code-review.sh --quick
+
+security-audit:
+	@./scripts/code-review.sh --security
+
+full-review:
+	@./scripts/code-review.sh --full
+
+memory-audit:
+	@./scripts/code-review.sh --memory
+
 # Help
 help:
 	@echo "Adventure Engine v2 - Build System"
@@ -147,6 +162,12 @@ help:
 	@echo "  clean            - Remove build artifacts"
 	@echo "  debug            - Build with AddressSanitizer (use: make DEBUG=1)"
 	@echo "  help             - Show this help"
+	@echo ""
+	@echo "Code Quality:"
+	@echo "  review           - Quick code review (quality + security)"
+	@echo "  security-audit   - Security-focused review only"
+	@echo "  full-review      - Complete review (all agents)"
+	@echo "  memory-audit     - C memory safety analysis"
 	@echo ""
 	@echo "Debug mode:"
 	@echo "  make DEBUG=1 all - Build all with AddressSanitizer"
