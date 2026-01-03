@@ -1,10 +1,10 @@
 # Adventure Engine v2 - Text Adventure Game Engine in C
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Language: C](https://img.shields.io/badge/Language-C11-blue.svg)](https://en.wikipedia.org/wiki/C11_(C_standard_revision))
+[![Language: C](https://img.shields.io/badge/Language-C11-blue.svg)](<https://en.wikipedia.org/wiki/C11_(C_standard_revision)>)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/jcaldwell-labs/adventure-engine-v2/actions)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Tests: 88%](https://img.shields.io/badge/tests-88%25%20passing-green.svg)](tests/)
+[![Tests: 98%](https://img.shields.io/badge/tests-98%25%20passing-green.svg)](tests/)
 
 > **A production-ready text adventure engine with multiplayer capabilities, smart terminal UI, and flexible world scripting - perfect for team building, education, and interactive storytelling.**
 
@@ -13,13 +13,15 @@
 ## 🎯 Why Adventure Engine v2?
 
 ### **For Developers**
-- 🚀 **Production-ready**: Zero compiler warnings, comprehensive tests (88% pass rate)
+
+- 🚀 **Production-ready**: Zero compiler warnings, comprehensive tests (98% pass rate)
 - 📚 **Well-documented**: 2,000+ lines of docs, AI-friendly guides
-- 🧪 **Thoroughly tested**: 26 unit tests, CI/CD automation
+- 🧪 **Thoroughly tested**: 49 unit tests, CI/CD automation
 - 🎨 **Clean architecture**: Modular design, ~4,000 LOC
 - 🔧 **Easy to extend**: Add commands, worlds, features in minutes
 
 ### **For Educators & Trainers**
+
 - 👥 **Team building**: Collaborative multiplayer (2-8 players)
 - 🎭 **Role-based gameplay**: 6 distinct roles with unique abilities
 - 📊 **Analytics**: Track team communication and problem-solving
@@ -27,6 +29,7 @@
 - 🖥️ **SSH-friendly**: Pure terminal, works over remote connections
 
 ### **For Game Creators**
+
 - 📝 **Simple scripting**: Human-readable `.world` file format
 - 🎮 **4 example worlds**: Dark Tower, Haunted Mansion, Crystal Caverns, Sky Pirates
 - 💾 **Save/load system**: Multiple save slots, state persistence
@@ -127,6 +130,7 @@ You enter the Great Hall...
 ```
 
 **Real-time dashboard** shows:
+
 - 📖 Narrative (story progression)
 - 🗺️ Map (player positions)
 - 📊 Stats (health, inventory)
@@ -138,27 +142,27 @@ You enter the Great Hall...
 
 ### Core Engine
 
-| Feature | Description | Status |
-|---------|-------------|--------|
-| **Command Parser** | Natural language commands with multi-word support | ✅ Complete |
-| **World System** | Rooms, items, inventory (50 rooms, 50 items capacity) | ✅ Complete |
-| **World Loader** | Parse `.world` files with validation and error reporting | ✅ Complete |
-| **Save/Load** | Multiple save slots with state persistence | ✅ Complete |
-| **Terminal UI** | Scrolling output, context coloring, readline integration | ✅ Complete |
+| Feature            | Description                                              | Status      |
+| ------------------ | -------------------------------------------------------- | ----------- |
+| **Command Parser** | Natural language commands with multi-word support        | ✅ Complete |
+| **World System**   | Rooms, items, inventory (50 rooms, 50 items capacity)    | ✅ Complete |
+| **World Loader**   | Parse `.world` files with validation and error reporting | ✅ Complete |
+| **Save/Load**      | Multiple save slots with state persistence               | ✅ Complete |
+| **Terminal UI**    | Scrolling output, context coloring, readline integration | ✅ Complete |
 
 ### Multiplayer (v3.0)
 
-| Feature | Description | Status |
-|---------|-------------|--------|
-| **Session Management** | 2-8 player sessions with lifecycle states | ✅ Infrastructure |
-| **Role System** | 6 roles (Leader, Scout, Engineer, Medic, Diplomat, Specialist) | ✅ Infrastructure |
-| **IPC Messaging** | 9 message types with priority queuing | ✅ Infrastructure |
-| **Tmux Dashboard** | 4-panel real-time UI | ✅ Infrastructure |
-| **Game Integration** | Connect multiplayer to engine | ⚠️ In Progress |
+| Feature                | Description                                                    | Status            |
+| ---------------------- | -------------------------------------------------------------- | ----------------- |
+| **Session Management** | 2-8 player sessions with lifecycle states                      | ✅ Infrastructure |
+| **Role System**        | 6 roles (Leader, Scout, Engineer, Medic, Diplomat, Specialist) | ✅ Infrastructure |
+| **IPC Messaging**      | 9 message types with priority queuing                          | ✅ Infrastructure |
+| **Tmux Dashboard**     | 4-panel real-time UI                                           | ✅ Infrastructure |
+| **Game Integration**   | Connect multiplayer to engine                                  | ⚠️ In Progress    |
 
 ### Testing & Quality
 
-- ✅ **26 unit tests** (88% pass rate)
+- ✅ **49 unit tests** (98% pass rate)
 - ✅ **Zero compiler warnings** (`-Wall -Wextra`)
 - ✅ **CI/CD automation** (GitHub Actions)
 - ✅ **Memory leak detection** (Valgrind)
@@ -169,26 +173,31 @@ You enter the Great Hall...
 ## 📚 Use Cases
 
 ### 1. **Corporate Team Building** 🏢
+
 Build communication and collaboration skills through cooperative problem-solving in text adventures.
 
 **Example**: Tech company uses "Crystal Caverns" for remote team onboarding, tracking how new hires collaborate.
 
 ### 2. **Educational Workshops** 🎓
+
 Teach programming, storytelling, or game design through interactive world creation.
 
 **Example**: University CS course assigns students to create themed worlds using the `.world` format.
 
 ### 3. **Game Development Learning** 🎮
+
 Study clean C architecture, parsers, state machines, and game systems.
 
 **Example**: Boot camp uses codebase as reference for building text-based games.
 
 ### 4. **Interactive Fiction** 📖
+
 Create branching narratives and puzzle adventures with save/load support.
 
 **Example**: Author creates multi-chapter mystery using the world scripting system.
 
 ### 5. **Terminal Gaming** 💻
+
 Enjoy retro-style gaming that works over SSH, on servers, or minimal systems.
 
 **Example**: System administrators play during downtime via SSH connections.
@@ -197,18 +206,19 @@ Enjoy retro-style gaming that works over SSH, on servers, or minimal systems.
 
 ## 🆚 Comparison
 
-| Feature | Adventure Engine v2 | Inform 7 | TADS 3 | Zork/Infocom |
-|---------|---------------------|----------|--------|--------------|
-| **Language** | C11 | Natural language | C-like | Assembly/ZIL |
-| **Multiplayer** | ✅ Native | ❌ | ❌ | ❌ |
-| **Save/Load** | ✅ Multiple slots | ✅ | ✅ | ✅ Limited |
-| **World Format** | Simple text | Complex DSL | Object-oriented | Compiled |
-| **Learning Curve** | Low | Medium | High | High |
-| **Terminal UI** | ✅ Smart UI | Text only | Text only | Text only |
-| **Team Building** | ✅ Built-in | ❌ | ❌ | ❌ |
-| **Open Source** | ✅ MIT | ✅ Artistic | ✅ | ❌ Proprietary |
+| Feature            | Adventure Engine v2 | Inform 7         | TADS 3          | Zork/Infocom   |
+| ------------------ | ------------------- | ---------------- | --------------- | -------------- |
+| **Language**       | C11                 | Natural language | C-like          | Assembly/ZIL   |
+| **Multiplayer**    | ✅ Native           | ❌               | ❌              | ❌             |
+| **Save/Load**      | ✅ Multiple slots   | ✅               | ✅              | ✅ Limited     |
+| **World Format**   | Simple text         | Complex DSL      | Object-oriented | Compiled       |
+| **Learning Curve** | Low                 | Medium           | High            | High           |
+| **Terminal UI**    | ✅ Smart UI         | Text only        | Text only       | Text only      |
+| **Team Building**  | ✅ Built-in         | ❌               | ❌              | ❌             |
+| **Open Source**    | ✅ MIT              | ✅ Artistic      | ✅              | ❌ Proprietary |
 
 **Unique Advantages:**
+
 - ✅ Only engine with native multiplayer team-building features
 - ✅ Modern C11 with excellent documentation
 - ✅ Production-ready with comprehensive tests
@@ -241,6 +251,7 @@ Enjoy retro-style gaming that works over SSH, on servers, or minimal systems.
 ```
 
 **Key Components:**
+
 - **Parser**: Verb+noun command extraction with multi-word support
 - **World**: 50 rooms, 50 items, 20-item inventory
 - **Save/Load**: State persistence to `~/.adventure-saves/`
@@ -302,6 +313,7 @@ location: entrance
 ```
 
 Play it:
+
 ```bash
 ./build/adventure-engine my_adventure
 ```
@@ -330,18 +342,21 @@ Play it:
 ## 📖 Documentation
 
 ### For Users
+
 - **[README.md](README.md)** - This file (overview & quick start)
 - **[docs/WORLD-FORMAT.md](docs/WORLD-FORMAT.md)** - World file format specification
 - **[docs/QUICK-START-MULTIPLAYER.md](docs/QUICK-START-MULTIPLAYER.md)** - 60-second multiplayer guide
 - **[docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** - Common issues and solutions
 
 ### For Developers
+
 - **[CLAUDE.md](CLAUDE.md)** - AI development guide (comprehensive codebase overview)
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution guidelines
 - **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** - System architecture deep dive
 - **[docs/MULTIPLAYER-SETUP.md](docs/MULTIPLAYER-SETUP.md)** - Multiplayer architecture
 
 ### Example Worlds
+
 - `worlds/dark_tower.world` - Beginner (3 rooms)
 - `worlds/haunted_mansion.world` - Intermediate (7 rooms)
 - `worlds/crystal_caverns.world` - Advanced (12 rooms)
@@ -363,6 +378,7 @@ make DEBUG=1 run-tests
 ```
 
 **Test Coverage:**
+
 - Parser tests: 7/8 passing
 - World tests: 11/11 passing
 - Save/Load tests: 7/7 passing
@@ -420,6 +436,7 @@ All code is tested with `-fsanitize=address,undefined` to detect memory errors.
 ### Code of Conduct
 
 We're committed to providing a welcoming and inspiring community:
+
 - ✅ Be respectful and professional
 - ✅ Welcome newcomers
 - ✅ Provide constructive feedback
@@ -430,26 +447,30 @@ We're committed to providing a welcoming and inspiring community:
 ## 🗺️ Roadmap
 
 ### ✅ Completed (v1.0 - v2.0)
+
 - Single-player engine with parser
 - World loading system (.world format)
 - Save/load with multiple slots
 - 4 example playable worlds
 - Smart terminal UI
-- Comprehensive test suite (26 tests, 88% passing)
+- Comprehensive test suite (49 tests, 98% passing)
 - Documentation (2,000+ lines)
 - CI/CD automation
 
 ### ✅ In Progress (v3.0)
+
 - Multiplayer infrastructure (sessions, roles, IPC)
 - Tmux dashboard integration
 - Team analytics and metrics
 
 ### 🔜 Next (v3.1)
+
 - [ ] Integrate multiplayer with game engine
 - [ ] Real-time state synchronization
 - [ ] Complete team building mechanics
 
 ### 🚀 Future (v4.0+)
+
 - [ ] NPC dialogue system
 - [ ] Puzzle mechanics (locks, keys, triggers)
 - [ ] Quest tracking
@@ -463,16 +484,16 @@ We're committed to providing a welcoming and inspiring community:
 
 ## 📊 Project Stats
 
-| Metric | Value |
-|--------|-------|
-| **Language** | C11 |
-| **Lines of Code** | ~7,000 |
-| **Test Coverage** | 88% (23/26 tests passing) |
-| **Compiler Warnings** | 0 |
-| **Documentation** | 2,000+ lines |
-| **Build Time** | ~1 second |
-| **Example Worlds** | 4 complete adventures |
-| **Dependencies** | ncurses, readline |
+| Metric                | Value                     |
+| --------------------- | ------------------------- |
+| **Language**          | C11                       |
+| **Lines of Code**     | ~7,000                    |
+| **Test Coverage**     | 98% (48/49 tests passing) |
+| **Compiler Warnings** | 0                         |
+| **Documentation**     | 2,000+ lines              |
+| **Build Time**        | ~1 second                 |
+| **Example Worlds**    | 4 complete adventures     |
+| **Dependencies**      | ncurses, readline         |
 
 ---
 

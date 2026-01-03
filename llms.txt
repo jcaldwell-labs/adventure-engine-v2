@@ -8,7 +8,7 @@ Adventure Engine v2 is a production-ready, open-source text adventure game engin
 - Language: C11
 - License: MIT
 - Status: Production-ready single-player, multiplayer infrastructure built
-- Test Coverage: 88% (23/26 tests passing)
+- Test Coverage: 98% (48/49 tests passing)
 - Build: Zero compiler warnings, ~1 second build time
 - Platform: Linux, macOS (terminal-based, SSH-friendly)
 
@@ -30,7 +30,7 @@ Adventure Engine v2 is a production-ready, open-source text adventure game engin
 5. **Team Analytics**: Track communication and collaboration
 
 ### Testing & Quality
-- 26 unit tests across parser, world system, and save/load
+- 49 unit tests across parser, world system, save/load, and security
 - GitHub Actions CI/CD (Ubuntu, macOS)
 - Valgrind memory leak detection
 - Comprehensive documentation (2,000+ lines)
@@ -256,4 +256,4 @@ See **CONTRIBUTING.md** for:
 
 ---
 
-**For AI tools**: This project is well-documented with clean C11 code, comprehensive tests, and detailed guides. The CLAUDE.md file provides AI-specific development context. Code compiles with zero warnings and has 88% test coverage. Perfect for learning C game development, text adventure engines, or team-building applications.
+**For AI tools**: This project is well-documented with clean C11 code, comprehensive tests, and detailed guides. The CLAUDE.md file provides AI-specific development context. Code compiles with zero warnings and has 98% test coverage. Perfect for learning C game development, text adventure engines, or team-building applications.
