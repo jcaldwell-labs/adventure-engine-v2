@@ -103,12 +103,17 @@ static bool parse_bool(const char *str) {
 }
 
 // Helper: Apply use command properties to an item
+// Note: use_consumable is only valid when use_message is provided
 static void apply_use_properties(Item *item, const char *use_message, bool use_consumable) {
     if (use_message[0] != '\0') {
         strncpy(item->use_message, use_message, sizeof(item->use_message) - 1);
         item->use_message[sizeof(item->use_message) - 1] = '\0';
+        item->use_consumable = use_consumable;
+    } else {
+        // No use message means item is not usable, so cannot be consumable
+        item->use_message[0] = '\0';
+        item->use_consumable = false;
     }
-    item->use_consumable = use_consumable;
 }
 
 // Helper: Parse locked_exits string "north=iron_key, east=master_key"
