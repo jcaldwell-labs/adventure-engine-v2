@@ -42,12 +42,14 @@ location: room_id
 Defines metadata about the world. Must appear once at the beginning.
 
 **Properties:**
+
 - `name` - Display name of the world (required)
 - `author` - Creator name (optional)
 - `version` - Version string (optional)
 - `start` - Starting room ID (optional, defaults to first room)
 
 **Example:**
+
 ```
 [WORLD]
 name: The Dark Tower
@@ -61,13 +63,19 @@ start: entrance
 Defines a room. Can appear multiple times.
 
 **Properties:**
+
 - `name` - Short room name (required, max 64 chars)
 - `description` - Full room description (required, max 512 chars)
 - `exits` - Comma-separated list of direction=room_id pairs (optional)
+- `locked_exits` - Comma-separated list of direction=item_id pairs for locked doors (optional)
 
 **Directions:** north, south, east, west, up, down
 
+**Locked Exits:**
+When a direction is listed in `locked_exits`, the player must have the specified item in their inventory to pass through. The door auto-unlocks when the player has the key and attempts to move through, and stays unlocked for the rest of the game.
+
 **Example:**
+
 ```
 [ROOM:entrance]
 name: Tower Entrance
@@ -78,19 +86,24 @@ exits: north=hall
 name: Grand Hall
 description: A vast hall with high vaulted ceilings. Torches flicker on the walls, casting dancing shadows.
 exits: south=entrance, east=chamber, up=tower_top
+locked_exits: east=chamber_key
 ```
+
+In this example, the east exit to the chamber is locked and requires the `chamber_key` item to unlock.
 
 #### [ITEM:id] Section
 
 Defines an item. Can appear multiple times.
 
 **Properties:**
+
 - `name` - Item name (required, max 64 chars)
 - `description` - Full description shown with "examine" (required, max 256 chars)
 - `takeable` - Can be picked up? (required: yes/no/true/false/1/0)
 - `location` - Room ID where item starts (required)
 
 **Example:**
+
 ```
 [ITEM:key]
 name: rusty key
@@ -130,11 +143,13 @@ Players can refer to it as "key", "rusty key", or "rusty_key".
 ## Error Reporting
 
 The world loader reports errors with:
+
 - File name
 - Line number
 - Error description
 
 Example:
+
 ```
 ERROR: dark_tower.world:15: Room 'hall' has invalid exit to 'nowhere'
 ```
