@@ -102,6 +102,38 @@ static bool parse_bool(const char *str) {
     return false;
 }
 
+// Helper: Parse locked_exits string "north=iron_key, east=master_key"
+// Note: Key validation is deferred to end of load since items may be defined after rooms
+static void parse_locked_exits(World *world, int room_idx, const char *exits_str) {
+    char buffer[512];
+    strncpy(buffer, exits_str, sizeof(buffer) - 1);
+    buffer[sizeof(buffer) - 1] = '\0';
+
+    char *saveptr;
+    char *token = strtok_r(buffer, ",", &saveptr);
+    while (token) {
+        token = trim(token);
+
+        char *equals = strchr(token, '=');
+        if (equals) {
+            *equals = '\0';
+            char *dir_str = trim(token);
+            char *key_id = trim(equals + 1);
+
+            int dir = str_to_direction(dir_str);
+            if (dir != -1) {
+                // Lock the exit - key validation happens at end of load
+                world_lock_exit(world, room_idx, (Direction)dir, key_id);
+            } else {
+                fprintf(stderr, "Warning: Room '%s' has invalid locked direction '%s'\n",
+                        world->rooms[room_idx].id, dir_str);
+            }
+        }
+
+        token = strtok_r(NULL, ",", &saveptr);
+    }
+}
+
 // Helper: Parse exits string "north=hall, east=chamber"
 static void parse_exits(World *world, int room_idx, const char *exits_str) {
     char buffer[512];
@@ -164,6 +196,7 @@ bool world_load_from_file(World *world, const char *filename, LoadError *error) 
     char prop_name[64] = "";
     char prop_description[512] = "";
     char prop_exits[512] = "";
+    char prop_locked_exits[512] = "";
     char prop_location[32] = "";
     bool prop_takeable = false;
 
@@ -210,6 +243,11 @@ bool world_load_from_file(World *world, const char *filename, LoadError *error) 
                 // Parse exits if present
                 if (prop_exits[0] != '\0') {
                     parse_exits(world, room_idx, prop_exits);
+                }
+
+                // Parse locked_exits if present
+                if (prop_locked_exits[0] != '\0') {
+                    parse_locked_exits(world, room_idx, prop_locked_exits);
                 }
             } else if (strcmp(current_section, "ITEM") == 0 && current_id[0] != '\0') {
                 if (prop_name[0] == '\0' || prop_description[0] == '\0' || prop_location[0] == '\0') {
@@ -259,6 +297,7 @@ bool world_load_from_file(World *world, const char *filename, LoadError *error) 
             prop_name[0] = '\0';
             prop_description[0] = '\0';
             prop_exits[0] = '\0';
+            prop_locked_exits[0] = '\0';
             prop_location[0] = '\0';
             prop_takeable = false;
 
@@ -297,6 +336,9 @@ bool world_load_from_file(World *world, const char *filename, LoadError *error) 
             } else if (strcmp(key, "exits") == 0) {
                 strncpy(prop_exits, value, sizeof(prop_exits) - 1);
                 prop_exits[sizeof(prop_exits) - 1] = '\0';
+            } else if (strcmp(key, "locked_exits") == 0) {
+                strncpy(prop_locked_exits, value, sizeof(prop_locked_exits) - 1);
+                prop_locked_exits[sizeof(prop_locked_exits) - 1] = '\0';
             }
         } else if (strcmp(current_section, "ITEM") == 0) {
             if (strcmp(key, "name") == 0) {
@@ -326,8 +368,13 @@ bool world_load_from_file(World *world, const char *filename, LoadError *error) 
         }
 
         int room_idx = world_add_room(world, current_id, prop_name, prop_description);
-        if (room_idx != -1 && prop_exits[0] != '\0') {
-            parse_exits(world, room_idx, prop_exits);
+        if (room_idx != -1) {
+            if (prop_exits[0] != '\0') {
+                parse_exits(world, room_idx, prop_exits);
+            }
+            if (prop_locked_exits[0] != '\0') {
+                parse_locked_exits(world, room_idx, prop_locked_exits);
+            }
         }
     } else if (strcmp(current_section, "ITEM") == 0 && current_id[0] != '\0') {
         if (prop_name[0] == '\0' || prop_description[0] == '\0' || prop_location[0] == '\0') {
@@ -369,6 +416,20 @@ bool world_load_from_file(World *world, const char *filename, LoadError *error) 
         error->line_number = 0;
         snprintf(error->message, sizeof(error->message), "No rooms defined in world");
         return false;
+    }
+
+    // Validate locked exits reference existing items
+    for (int i = 0; i < world->room_count; i++) {
+        for (int dir = 0; dir < DIR_COUNT; dir++) {
+            if (world->rooms[i].locked_exits[dir][0] != '\0') {
+                int key_item = world_find_item(world, world->rooms[i].locked_exits[dir]);
+                if (key_item == -1) {
+                    fprintf(stderr, "Warning: Room '%s' has locked exit '%s' requiring non-existent key '%s'\n",
+                            world->rooms[i].id, direction_to_str((Direction)dir),
+                            world->rooms[i].locked_exits[dir]);
+                }
+            }
+        }
     }
 
     return true;
