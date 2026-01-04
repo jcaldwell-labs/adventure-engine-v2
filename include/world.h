@@ -40,7 +40,16 @@ typedef struct {
     int exits[DIR_COUNT];     // Room IDs for each direction (-1 = no exit)
     int items[MAX_ITEMS];     // Item IDs in this room (-1 = empty slot)
     bool visited;             // Has player been here?
+    char locked_exits[DIR_COUNT][32];  // Item ID required to unlock each direction (empty = unlocked)
+    bool exit_unlocked[DIR_COUNT];     // Runtime state: has this exit been unlocked?
 } Room;
+
+// Movement result codes
+typedef enum {
+    MOVE_SUCCESS = 0,
+    MOVE_NO_EXIT = -1,
+    MOVE_LOCKED = -2
+} MoveResult;
 
 // World state
 typedef struct {
@@ -78,6 +87,21 @@ Room* world_current_room(World *world);
 
 // Move to room in direction (returns true if successful)
 bool world_move(World *world, Direction dir);
+
+// Move with extended result (returns MoveResult, fills key_needed if locked)
+MoveResult world_move_ex(World *world, Direction dir, char *key_needed, size_t key_size);
+
+// Check if exit in direction is locked
+bool world_exit_is_locked(World *world, Direction dir);
+
+// Unlock exit in direction (for use by key items)
+void world_unlock_exit(World *world, int room_id, Direction dir);
+
+// Lock an exit (used by world loader)
+void world_lock_exit(World *world, int room_id, Direction dir, const char *key_item_id);
+
+// Get the key required for a locked exit
+const char* world_get_required_key(World *world, Direction dir);
 
 // Take item from current room (returns true if successful)
 bool world_take_item(World *world, const char *item_id);

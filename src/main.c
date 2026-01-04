@@ -378,11 +378,30 @@ void cmd_go(World *world, const char *direction) {
         return;
     }
 
-    if (world_move(world, (Direction)dir)) {
-        st_add_output("", ST_CTX_NORMAL);
-        cmd_look(world);
-    } else {
-        st_add_output("You can't go that way.", ST_CTX_NORMAL);
+    char key_needed[32];
+    MoveResult result = world_move_ex(world, (Direction)dir, key_needed, sizeof(key_needed));
+
+    switch (result) {
+        case MOVE_SUCCESS:
+            st_add_output("", ST_CTX_NORMAL);
+            cmd_look(world);
+            break;
+        case MOVE_NO_EXIT:
+            st_add_output("You can't go that way.", ST_CTX_NORMAL);
+            break;
+        case MOVE_LOCKED: {
+            char msg[128];
+            // Look up the key's display name from the item
+            int key_idx = world_find_item(world, key_needed);
+            if (key_idx != -1) {
+                snprintf(msg, sizeof(msg), "The way %s is locked. You need the %s.",
+                        direction, world->items[key_idx].name);
+            } else {
+                snprintf(msg, sizeof(msg), "The way %s is locked.", direction);
+            }
+            st_add_output(msg, ST_CTX_NORMAL);
+            break;
+        }
     }
 }
 
