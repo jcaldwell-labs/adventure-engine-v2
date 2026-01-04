@@ -103,6 +103,7 @@ static bool parse_bool(const char *str) {
 }
 
 // Helper: Parse locked_exits string "north=iron_key, east=master_key"
+// Note: Key validation is deferred to end of load since items may be defined after rooms
 static void parse_locked_exits(World *world, int room_idx, const char *exits_str) {
     char buffer[512];
     strncpy(buffer, exits_str, sizeof(buffer) - 1);
@@ -121,16 +122,8 @@ static void parse_locked_exits(World *world, int room_idx, const char *exits_str
 
             int dir = str_to_direction(dir_str);
             if (dir != -1) {
-                // Validate that the key item exists in the world
-                int key_item = world_find_item(world, key_id);
-                if (key_item != -1) {
-                    world_lock_exit(world, room_idx, (Direction)dir, key_id);
-                } else {
-                    fprintf(stderr, "Warning: Room '%s' has locked exit '%s' requiring non-existent key '%s'\n",
-                            world->rooms[room_idx].id, dir_str, key_id);
-                    // Still lock the exit - key might be defined later in file
-                    world_lock_exit(world, room_idx, (Direction)dir, key_id);
-                }
+                // Lock the exit - key validation happens at end of load
+                world_lock_exit(world, room_idx, (Direction)dir, key_id);
             } else {
                 fprintf(stderr, "Warning: Room '%s' has invalid locked direction '%s'\n",
                         world->rooms[room_idx].id, dir_str);
@@ -423,6 +416,20 @@ bool world_load_from_file(World *world, const char *filename, LoadError *error) 
         error->line_number = 0;
         snprintf(error->message, sizeof(error->message), "No rooms defined in world");
         return false;
+    }
+
+    // Validate locked exits reference existing items
+    for (int i = 0; i < world->room_count; i++) {
+        for (int dir = 0; dir < DIR_COUNT; dir++) {
+            if (world->rooms[i].locked_exits[dir][0] != '\0') {
+                int key_item = world_find_item(world, world->rooms[i].locked_exits[dir]);
+                if (key_item == -1) {
+                    fprintf(stderr, "Warning: Room '%s' has locked exit '%s' requiring non-existent key '%s'\n",
+                            world->rooms[i].id, direction_to_str((Direction)dir),
+                            world->rooms[i].locked_exits[dir]);
+                }
+            }
+        }
     }
 
     return true;

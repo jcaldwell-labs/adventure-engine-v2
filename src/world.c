@@ -180,8 +180,10 @@ void world_lock_exit(World *world, int room_id, Direction dir, const char *key_i
     if (dir < 0 || dir >= DIR_COUNT) return;
     if (!key_item_id) return;
 
-    strncpy(world->rooms[room_id].locked_exits[dir], key_item_id, 31);
-    world->rooms[room_id].locked_exits[dir][31] = '\0';
+    strncpy(world->rooms[room_id].locked_exits[dir],
+            key_item_id,
+            sizeof(world->rooms[room_id].locked_exits[dir]) - 1);
+    world->rooms[room_id].locked_exits[dir][sizeof(world->rooms[room_id].locked_exits[dir]) - 1] = '\0';
     world->rooms[room_id].exit_unlocked[dir] = false;
 }
 

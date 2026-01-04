@@ -44,11 +44,11 @@ typedef struct {
     bool exit_unlocked[DIR_COUNT];     // Runtime state: has this exit been unlocked?
 } Room;
 
-// Movement result codes
+// Movement result codes (all non-negative for consistency)
 typedef enum {
     MOVE_SUCCESS = 0,
-    MOVE_NO_EXIT = -1,
-    MOVE_LOCKED = -2
+    MOVE_NO_EXIT = 1,
+    MOVE_LOCKED = 2
 } MoveResult;
 
 // World state
