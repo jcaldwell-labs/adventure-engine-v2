@@ -30,6 +30,9 @@ typedef struct {
     char description[256]; // Full description
     bool takeable;         // Can be picked up?
     bool visible;          // Is it visible/discovered?
+    // Issue #8: Use command support
+    char use_message[256]; // Message shown when item is used (empty = not usable)
+    bool use_consumable;   // Is item consumed after use?
 } Item;
 
 // Room definition
@@ -111,6 +114,9 @@ bool world_drop_item(World *world, const char *item_id);
 
 // Check if item is in inventory
 bool world_has_item(World *world, const char *item_id);
+
+// Remove item from inventory (for consumable items)
+bool world_remove_from_inventory(World *world, const char *item_id);
 
 // Get item from inventory by ID (returns NULL if not found)
 Item* world_get_inventory_item(World *world, const char *item_id);

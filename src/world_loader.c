@@ -199,6 +199,9 @@ bool world_load_from_file(World *world, const char *filename, LoadError *error) 
     char prop_locked_exits[512] = "";
     char prop_location[32] = "";
     bool prop_takeable = false;
+    // Issue #8: Use command properties
+    char prop_use_message[256] = "";
+    bool prop_use_consumable = false;
 
     char world_name[64] = "Untitled";
     char world_start[32] = "";
@@ -269,6 +272,13 @@ bool world_load_from_file(World *world, const char *filename, LoadError *error) 
                     return false;
                 }
 
+                // Set use command properties
+                if (prop_use_message[0] != '\0') {
+                    strncpy(world->items[item_idx].use_message, prop_use_message, 255);
+                    world->items[item_idx].use_message[255] = '\0';
+                }
+                world->items[item_idx].use_consumable = prop_use_consumable;
+
                 // Place item in room
                 int room_idx = world_find_room(world, prop_location);
                 if (room_idx != -1) {
@@ -300,6 +310,8 @@ bool world_load_from_file(World *world, const char *filename, LoadError *error) 
             prop_locked_exits[0] = '\0';
             prop_location[0] = '\0';
             prop_takeable = false;
+            prop_use_message[0] = '\0';
+            prop_use_consumable = false;
 
             continue;
         }
@@ -352,6 +364,11 @@ bool world_load_from_file(World *world, const char *filename, LoadError *error) 
             } else if (strcmp(key, "location") == 0) {
                 strncpy(prop_location, value, sizeof(prop_location) - 1);
                 prop_location[sizeof(prop_location) - 1] = '\0';
+            } else if (strcmp(key, "use_message") == 0) {
+                strncpy(prop_use_message, value, sizeof(prop_use_message) - 1);
+                prop_use_message[sizeof(prop_use_message) - 1] = '\0';
+            } else if (strcmp(key, "use_consumable") == 0) {
+                prop_use_consumable = parse_bool(value);
             }
         }
     }
@@ -388,6 +405,13 @@ bool world_load_from_file(World *world, const char *filename, LoadError *error) 
 
         int item_idx = world_add_item(world, current_id, prop_name, prop_description, prop_takeable);
         if (item_idx != -1) {
+            // Set use command properties
+            if (prop_use_message[0] != '\0') {
+                strncpy(world->items[item_idx].use_message, prop_use_message, 255);
+                world->items[item_idx].use_message[255] = '\0';
+            }
+            world->items[item_idx].use_consumable = prop_use_consumable;
+
             int room_idx = world_find_room(world, prop_location);
             if (room_idx != -1) {
                 world_place_item(world, item_idx, room_idx);

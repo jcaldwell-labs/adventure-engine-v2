@@ -1,5 +1,6 @@
-# Puzzle Test World - Tests locked doors and key mechanics
+# Puzzle Test World - Tests locked doors, keys, and usable items
 # Issue #5: Locked doors and key mechanics
+# Issue #8: Use command with consumable items
 
 [WORLD]
 name: Puzzle Test
@@ -7,7 +8,7 @@ start: start
 
 [ROOM:start]
 name: Starting Room
-description: A simple room with a heavy iron door to the north. The door appears to be locked.
+description: A simple room with a heavy iron door to the north. The door appears to be locked. A table holds various supplies.
 exits: north=treasure
 locked_exits: north=iron_key
 
@@ -21,3 +22,27 @@ name: iron key
 description: A heavy iron key. It looks like it would fit the door to the north.
 takeable: yes
 location: start
+
+[ITEM:healing_potion]
+name: healing potion
+description: A red potion that glows faintly. It looks restorative.
+takeable: yes
+location: start
+use_message: You drink the healing potion. A warm sensation flows through your body and you feel restored!
+use_consumable: yes
+
+[ITEM:magic_torch]
+name: magic torch
+description: A torch with an eternal flame that never burns out.
+takeable: yes
+location: start
+use_message: You hold up the magic torch. Its warm light illuminates the area, revealing hidden details in the walls.
+use_consumable: no
+
+[ITEM:ancient_scroll]
+name: ancient scroll
+description: A yellowed scroll covered in mysterious runes.
+takeable: yes
+location: treasure
+use_message: You unroll the scroll and read the ancient incantation. The words fade as you speak them, and you feel a strange power awaken within you.
+use_consumable: yes
