@@ -14,10 +14,12 @@ void world_init(World *world) {
     world->item_count = 0;
     world->current_room = 0;
 
-    // Initialize exits to -1 (no exit)
+    // Initialize exits to -1 (no exit) and locked_exits to empty
     for (int i = 0; i < MAX_ROOMS; i++) {
         for (int j = 0; j < DIR_COUNT; j++) {
             world->rooms[i].exits[j] = -1;
+            world->rooms[i].locked_exits[j][0] = '\0';
+            world->rooms[i].exit_unlocked[j] = false;
         }
         for (int j = 0; j < MAX_ITEMS; j++) {
             world->rooms[i].items[j] = -1;
@@ -41,9 +43,11 @@ int world_add_room(World *world, const char *id, const char *name, const char *d
     strncpy(room->description, desc, sizeof(room->description) - 1);
     room->visited = false;
 
-    // Initialize exits
+    // Initialize exits and locked exits
     for (int i = 0; i < DIR_COUNT; i++) {
         room->exits[i] = -1;
+        room->locked_exits[i][0] = '\0';
+        room->exit_unlocked[i] = false;
     }
 
     // Initialize items
@@ -118,15 +122,77 @@ Room* world_current_room(World *world) {
 }
 
 bool world_move(World *world, Direction dir) {
+    char key_needed[32];
+    MoveResult result = world_move_ex(world, dir, key_needed, sizeof(key_needed));
+    return result == MOVE_SUCCESS;
+}
+
+MoveResult world_move_ex(World *world, Direction dir, char *key_needed, size_t key_size) {
+    if (key_needed && key_size > 0) {
+        key_needed[0] = '\0';
+    }
+
     Room *room = world_current_room(world);
-    if (!room) return false;
+    if (!room) return MOVE_NO_EXIT;
 
     int next_room = room->exits[dir];
-    if (next_room == -1) return false;
+    if (next_room == -1) return MOVE_NO_EXIT;
+
+    // Check if exit is locked
+    if (room->locked_exits[dir][0] != '\0' && !room->exit_unlocked[dir]) {
+        // Exit is locked - check if player has the key
+        const char *required_key = room->locked_exits[dir];
+        if (world_has_item(world, required_key)) {
+            // Player has key - auto-unlock and proceed
+            room->exit_unlocked[dir] = true;
+        } else {
+            // Player doesn't have key
+            if (key_needed && key_size > 0) {
+                strncpy(key_needed, required_key, key_size - 1);
+                key_needed[key_size - 1] = '\0';
+            }
+            return MOVE_LOCKED;
+        }
+    }
 
     world->current_room = next_room;
     world->rooms[next_room].visited = true;
-    return true;
+    return MOVE_SUCCESS;
+}
+
+bool world_exit_is_locked(World *world, Direction dir) {
+    Room *room = world_current_room(world);
+    if (!room) return false;
+
+    // Exit is locked if it has a required key AND hasn't been unlocked yet
+    return room->locked_exits[dir][0] != '\0' && !room->exit_unlocked[dir];
+}
+
+void world_unlock_exit(World *world, int room_id, Direction dir) {
+    if (room_id < 0 || room_id >= world->room_count) return;
+    if (dir < 0 || dir >= DIR_COUNT) return;
+
+    world->rooms[room_id].exit_unlocked[dir] = true;
+}
+
+void world_lock_exit(World *world, int room_id, Direction dir, const char *key_item_id) {
+    if (room_id < 0 || room_id >= world->room_count) return;
+    if (dir < 0 || dir >= DIR_COUNT) return;
+    if (!key_item_id) return;
+
+    strncpy(world->rooms[room_id].locked_exits[dir], key_item_id, 31);
+    world->rooms[room_id].locked_exits[dir][31] = '\0';
+    world->rooms[room_id].exit_unlocked[dir] = false;
+}
+
+const char* world_get_required_key(World *world, Direction dir) {
+    Room *room = world_current_room(world);
+    if (!room) return NULL;
+
+    if (room->locked_exits[dir][0] != '\0') {
+        return room->locked_exits[dir];
+    }
+    return NULL;
 }
 
 bool world_take_item(World *world, const char *item_id) {

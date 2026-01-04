@@ -1,0 +1,23 @@
+# Puzzle Test World - Tests locked doors and key mechanics
+# Issue #5: Locked doors and key mechanics
+
+[WORLD]
+name: Puzzle Test
+start: start
+
+[ROOM:start]
+name: Starting Room
+description: A simple room with a heavy iron door to the north. The door appears to be locked.
+exits: north=treasure
+locked_exits: north=iron_key
+
+[ROOM:treasure]
+name: Treasure Room
+description: You made it! Golden treasures gleam in the torchlight. Victory is yours!
+exits: south=start
+
+[ITEM:iron_key]
+name: iron key
+description: A heavy iron key. It looks like it would fit the door to the north.
+takeable: yes
+location: start

@@ -15,7 +15,7 @@
 #include "save_load.h"
 
 #define SAVE_DIR_NAME ".adventure-saves"
-#define SAVE_VERSION 1
+#define SAVE_VERSION 2  // v2 adds exit_unlocked state
 
 // Get the save directory path
 static void get_save_dir(char *buffer, size_t buffer_size) {
@@ -149,6 +149,18 @@ bool game_save(const World *world, const char *slot_name, const char *world_name
         }
         fprintf(file, "\n");
     }
+    fprintf(file, "\n");
+
+    // Write unlocked exits state (v2+)
+    fprintf(file, "[UNLOCKED_EXITS]\n");
+    for (int i = 0; i < world->room_count; i++) {
+        fprintf(file, "ROOM:%d:", i);
+        for (int j = 0; j < DIR_COUNT; j++) {
+            fprintf(file, "%d", world->rooms[i].exit_unlocked[j] ? 1 : 0);
+            if (j < DIR_COUNT - 1) fprintf(file, ",");
+        }
+        fprintf(file, "\n");
+    }
 
     fclose(file);
     return true;
@@ -181,12 +193,18 @@ bool game_load(World *world, const char *slot_name, char *world_name, size_t wor
     int visited[MAX_ROOMS];
     int room_items[MAX_ROOMS][MAX_ITEMS];
 
+    // Temporary storage for unlocked exits (v2+)
+    bool unlocked_exits[MAX_ROOMS][DIR_COUNT];
+
     // Initialize
     for (int i = 0; i < MAX_INVENTORY; i++) inventory[i] = -1;
     for (int i = 0; i < MAX_ROOMS; i++) {
         visited[i] = 0;
         for (int j = 0; j < MAX_ITEMS; j++) {
             room_items[i][j] = -1;
+        }
+        for (int j = 0; j < DIR_COUNT; j++) {
+            unlocked_exits[i][j] = false;
         }
     }
 
@@ -269,13 +287,40 @@ bool game_load(World *world, const char *slot_name, char *world_name, size_t wor
                     }
                 }
             }
+        } else if (strcmp(section, "UNLOCKED_EXITS") == 0) {
+            // Parse: ROOM:0:0,0,1,0,0,0 (one value per direction)
+            if (strncmp(line, "ROOM:", 5) == 0) {
+                int room_idx;
+                if (sscanf(line, "ROOM:%d:", &room_idx) == 1) {
+                    if (room_idx >= 0 && room_idx < MAX_ROOMS) {
+                        char *colon = strchr(line, ':');
+                        if (colon) {
+                            colon = strchr(colon + 1, ':');
+                            if (colon && colon[1] != '\0') {
+                                char *exits = colon + 1;
+                                int dir_slot = 0;
+                                char *saveptr;
+                                char *token = strtok_r(exits, ",", &saveptr);
+                                while (token && dir_slot < DIR_COUNT) {
+                                    int unlocked;
+                                    if (sscanf(token, "%d", &unlocked) == 1) {
+                                        unlocked_exits[room_idx][dir_slot] = (unlocked != 0);
+                                    }
+                                    dir_slot++;
+                                    token = strtok_r(NULL, ",", &saveptr);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
     fclose(file);
 
-    // Validate version
-    if (version != SAVE_VERSION) {
+    // Validate version (accept v1 and v2 saves, v1 saves won't have unlocked exits)
+    if (version < 1 || version > SAVE_VERSION) {
         return false;
     }
 
@@ -304,6 +349,13 @@ bool game_load(World *world, const char *slot_name, char *world_name, size_t wor
     for (int i = 0; i < rooms_to_apply; i++) {
         for (int j = 0; j < MAX_ITEMS; j++) {
             world->rooms[i].items[j] = room_items[i][j];
+        }
+    }
+
+    // Apply unlocked exits state (v2+)
+    for (int i = 0; i < rooms_to_apply; i++) {
+        for (int j = 0; j < DIR_COUNT; j++) {
+            world->rooms[i].exit_unlocked[j] = unlocked_exits[i][j];
         }
     }
 

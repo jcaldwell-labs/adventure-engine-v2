@@ -43,6 +43,7 @@ TEST_WORLD = $(BUILD_DIR)/test_world
 TEST_SAVE_LOAD = $(BUILD_DIR)/test_save_load
 TEST_PATH_TRAVERSAL = $(BUILD_DIR)/test_path_traversal
 TEST_SECURITY = $(BUILD_DIR)/test_security
+TEST_LOCKED_EXITS = $(BUILD_DIR)/test_locked_exits
 
 .PHONY: all clean lib engine multiplayer test tests run run-test run-coordinator run-tests debug
 
@@ -64,7 +65,7 @@ $(LIB_OBJ): $(LIB_SRC) $(INCLUDE_DIR)/smartterm_simple.h | $(BUILD_DIR)
 # Build test programs
 test: tests
 
-tests: $(TEST_PARSER) $(TEST_WORLD) $(TEST_SAVE_LOAD) $(TEST_PATH_TRAVERSAL) $(TEST_SECURITY)
+tests: $(TEST_PARSER) $(TEST_WORLD) $(TEST_SAVE_LOAD) $(TEST_PATH_TRAVERSAL) $(TEST_SECURITY) $(TEST_LOCKED_EXITS)
 
 # Parser tests
 $(TEST_PARSER): $(TEST_DIR)/test_parser.c $(BUILD_DIR)/parser.o | $(BUILD_DIR)
@@ -84,6 +85,10 @@ $(TEST_PATH_TRAVERSAL): $(TEST_DIR)/test_path_traversal.c $(BUILD_DIR)/save_load
 
 # Security tests (Issue #16 fixes)
 $(TEST_SECURITY): $(TEST_DIR)/test_security.c $(BUILD_DIR)/player.o $(BUILD_DIR)/session.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+
+# Locked exits tests (Issue #5)
+$(TEST_LOCKED_EXITS): $(TEST_DIR)/test_locked_exits.c $(BUILD_DIR)/world.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
 # Build adventure engine
@@ -120,6 +125,9 @@ run-test: tests
 	@echo ""
 	@echo "Running Security Tests (Issue #16 fixes)..."
 	@$(TEST_SECURITY) || true
+	@echo ""
+	@echo "Running Locked Exits Tests (Issue #5)..."
+	@$(TEST_LOCKED_EXITS) || true
 
 run-tests: run-test
 
