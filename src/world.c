@@ -69,6 +69,9 @@ int world_add_item(World *world, const char *id, const char *name, const char *d
     strncpy(item->description, desc, sizeof(item->description) - 1);
     item->takeable = takeable;
     item->visible = true;
+    // Issue #8: Initialize use command fields
+    item->use_message[0] = '\0';
+    item->use_consumable = false;
 
     return idx;
 }
@@ -271,6 +274,19 @@ bool world_has_item(World *world, const char *item_id) {
         if (world->inventory[i] != -1) {
             Item *item = &world->items[world->inventory[i]];
             if (strcmp(item->id, item_id) == 0) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool world_remove_from_inventory(World *world, const char *item_id) {
+    for (int i = 0; i < MAX_INVENTORY; i++) {
+        if (world->inventory[i] != -1) {
+            Item *item = &world->items[world->inventory[i]];
+            if (strcmp(item->id, item_id) == 0) {
+                world->inventory[i] = -1;
                 return true;
             }
         }

@@ -8,7 +8,7 @@ Adventure Engine v2 is a production-ready, open-source text adventure game engin
 - Language: C11
 - License: MIT
 - Status: Production-ready single-player, multiplayer infrastructure built
-- Test Coverage: 98% (48/49 tests passing)
+- Test Coverage: 98% (65/66 tests passing)
 - Build: Zero compiler warnings, ~1 second build time
 - Platform: Linux, macOS (terminal-based, SSH-friendly)
 
@@ -30,7 +30,7 @@ Adventure Engine v2 is a production-ready, open-source text adventure game engin
 5. **Team Analytics**: Track communication and collaboration
 
 ### Testing & Quality
-- 49 unit tests across parser, world system, save/load, and security
+- 66 unit tests across parser, world system, save/load, security, locked exits, and use command
 - GitHub Actions CI/CD (Ubuntu, macOS)
 - Valgrind memory leak detection
 - Comprehensive documentation (2,000+ lines)
@@ -135,6 +135,8 @@ World Loader (world_loader.c) - Parse .world files
 **Room**:
 - id, name, description
 - exits[6]: Connections (N, S, E, W, U, D)
+- locked_exits[6]: Required item to unlock each direction
+- exit_unlocked[6]: Runtime unlock state
 - items[50]: Items in room
 - visited: Discovery tracking
 
@@ -142,6 +144,8 @@ World Loader (world_loader.c) - Parse .world files
 - id, name, description
 - takeable: Can be picked up
 - visible: Is discovered
+- use_message: Message shown when used (empty = not usable)
+- use_consumable: Is consumed after use
 
 ### Memory Management
 - Fixed-size arrays (predictable memory usage)
@@ -177,6 +181,10 @@ World Loader (world_loader.c) - Parse .world files
 - test_parser.c: 8 tests (command parsing)
 - test_world.c: 11 tests (world operations)
 - test_save_load.c: 7 tests (persistence)
+- test_path_traversal.c: 16 tests (path security)
+- test_security.c: 8 tests (memory safety)
+- test_locked_exits.c: 8 tests (locked doors)
+- test_use_command.c: 8 tests (use command)
 
 ### Documentation (docs/)
 - ARCHITECTURE.md: System architecture
@@ -190,6 +198,7 @@ World Loader (world_loader.c) - Parse .world files
 - haunted_mansion.world (7 rooms, intermediate)
 - crystal_caverns.world (12 rooms, advanced)
 - sky_pirates.world (7 rooms, intermediate)
+- puzzle_test.world (2 rooms, locked doors + usable items demo)
 
 ## AI Development Guide
 
@@ -217,7 +226,7 @@ See **CONTRIBUTING.md** for:
 1. Multiplayer infrastructure built but not integrated with game engine (in progress)
 2. Tab characters in commands not split by parser (use spaces)
 3. No NPC dialogue system (static world files)
-4. No puzzle mechanics (locks, keys, triggers not implemented yet)
+4. Visited room state now persists across save/load (fixed in v3.0)
 
 ## Roadmap
 

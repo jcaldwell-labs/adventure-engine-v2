@@ -24,6 +24,7 @@ void cmd_take(World *world, const char *item_id);
 void cmd_drop(World *world, const char *item_id);
 void cmd_inventory(World *world);
 void cmd_examine(World *world, const char *item_id);
+void cmd_use(World *world, const char *item_id);
 void cmd_save(World *world, const char *slot_name);
 void cmd_load(World *world, const char *slot_name);
 void cmd_saves(void);
@@ -285,6 +286,8 @@ void handle_command(World *world, const Command *cmd) {
         cmd_inventory(world);
     } else if (cmd_is(cmd, "examine") || cmd_is(cmd, "x") || cmd_is(cmd, "inspect")) {
         cmd_examine(world, cmd->noun);
+    } else if (cmd_is(cmd, "use")) {
+        cmd_use(world, cmd->noun);
     } else if (cmd_is(cmd, "save")) {
         cmd_save(world, cmd->noun);
     } else if (cmd_is(cmd, "load")) {
@@ -304,6 +307,7 @@ void cmd_help(void) {
     st_add_output("  take <item>          - Pick up an item", ST_CTX_NORMAL);
     st_add_output("  drop <item>          - Drop an item", ST_CTX_NORMAL);
     st_add_output("  examine <item>       - Examine an item closely", ST_CTX_NORMAL);
+    st_add_output("  use <item>           - Use an item from inventory", ST_CTX_NORMAL);
     st_add_output("  inventory, i         - Show your inventory", ST_CTX_NORMAL);
     st_add_output("  save <slot>          - Save game to slot", ST_CTX_NORMAL);
     st_add_output("  load <slot>          - Load game from slot", ST_CTX_NORMAL);
@@ -547,4 +551,40 @@ void cmd_saves(void) {
     }
 
     st_add_output("", ST_CTX_NORMAL);
+}
+
+void cmd_use(World *world, const char *item_id) {
+    if (!item_id || strlen(item_id) == 0) {
+        st_add_output("Use what?", ST_CTX_NORMAL);
+        return;
+    }
+
+    // Find item in inventory only (must have item to use it)
+    Item *item = find_item_fuzzy(world, item_id, true, false);
+
+    if (!item) {
+        st_add_output("You don't have that.", ST_CTX_NORMAL);
+        return;
+    }
+
+    // Check if item is usable
+    if (item->use_message[0] == '\0') {
+        char buf[128];
+        snprintf(buf, sizeof(buf), "You can't use the %s.", item->name);
+        st_add_output(buf, ST_CTX_NORMAL);
+        return;
+    }
+
+    // Display use message
+    st_add_output("", ST_CTX_NORMAL);
+    st_add_output(item->use_message, ST_CTX_SPECIAL);
+    st_add_output("", ST_CTX_NORMAL);
+
+    // Remove item if consumable
+    if (item->use_consumable) {
+        world_remove_from_inventory(world, item->id);
+        char buf[128];
+        snprintf(buf, sizeof(buf), "The %s is consumed.", item->name);
+        st_add_output(buf, ST_CTX_COMMENT);
+    }
 }

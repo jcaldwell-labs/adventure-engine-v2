@@ -1,6 +1,6 @@
 # Adventure Engine World File Format
 
-Version 1.0
+Version 1.1
 
 ## Overview
 
@@ -101,6 +101,11 @@ Defines an item. Can appear multiple times.
 - `description` - Full description shown with "examine" (required, max 256 chars)
 - `takeable` - Can be picked up? (required: yes/no/true/false/1/0)
 - `location` - Room ID where item starts (required)
+- `use_message` - Message shown when item is used (optional, max 256 chars)
+- `use_consumable` - Is item consumed after use? (optional: yes/no, default: no)
+
+**Usable Items:**
+Items with a `use_message` can be used by the player with the "use" command. If `use_consumable` is set to `yes`, the item is removed from inventory after use. Items without a `use_message` cannot be used.
 
 **Example:**
 
@@ -116,6 +121,22 @@ name: stone statue
 description: A heavy stone statue of a forgotten king. Too heavy to move.
 takeable: no
 location: hall
+
+[ITEM:healing_potion]
+name: healing potion
+description: A red potion that glows with restorative magic.
+takeable: yes
+location: entrance
+use_message: You drink the healing potion. Warmth flows through your body!
+use_consumable: yes
+
+[ITEM:magic_torch]
+name: magic torch
+description: A torch with an eternal flame.
+takeable: yes
+location: entrance
+use_message: You hold up the torch. Its light reveals hidden details in the walls.
+use_consumable: no
 ```
 
 ## Multi-word Item IDs
@@ -210,10 +231,11 @@ location: chamber
 Planned features for future versions:
 
 - **NPCs**: Character definitions with dialogue
-- **Locked Exits**: Doors requiring keys or conditions
-- **Item Usage**: Scripts for item interactions
+- ~~**Locked Exits**: Doors requiring keys or conditions~~ (Implemented in v1.1)
+- ~~**Item Usage**: Scripts for item interactions~~ (Implemented in v1.1)
 - **Triggers**: Events that change world state
 - **Variables**: Global and local state tracking
+- **Conditional Descriptions**: Room descriptions that change based on state
 
 ## Best Practices
 
