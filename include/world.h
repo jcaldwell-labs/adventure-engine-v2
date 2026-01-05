@@ -30,7 +30,7 @@ typedef enum {
     COND_VISITED,        // Returning to room (not first visit)
     COND_HAS_ITEM,       // Player has item in inventory
     COND_ROOM_HAS_ITEM,  // Item is present in this room
-    COND_ITEM_USED       // Item has been used (consumed)
+    COND_ITEM_USED       // Has item ever been used? (for conditional descriptions)
 } ConditionType;
 
 // Conditional description (multiple can apply to a room)
@@ -62,6 +62,7 @@ typedef struct {
     int exits[DIR_COUNT];     // Room IDs for each direction (-1 = no exit)
     int items[MAX_ITEMS];     // Item IDs in this room (-1 = empty slot)
     bool visited;             // Has player been here?
+    bool description_shown;   // Has room description been displayed? (for first_visit condition)
     char locked_exits[DIR_COUNT][32];  // Item ID required to unlock each direction (empty = unlocked)
     bool exit_unlocked[DIR_COUNT];     // Runtime state: has this exit been unlocked?
     // Issue #6: Conditional descriptions

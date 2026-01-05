@@ -42,6 +42,7 @@ int world_add_room(World *world, const char *id, const char *name, const char *d
     strncpy(room->name, name, sizeof(room->name) - 1);
     strncpy(room->description, desc, sizeof(room->description) - 1);
     room->visited = false;
+    room->description_shown = false;
     room->conditional_desc_count = 0;
 
     // Initialize exits and locked exits
@@ -154,10 +155,9 @@ static bool evaluate_condition(World *world, Room *room, ConditionalDesc *cond) 
 
     switch (cond->type) {
         case COND_FIRST_VISIT:
-            // First visit means room has NOT been visited before this entry
-            // Note: visited is set to true when entering, so we check if this
-            // is the first time (visited was false before entering)
-            result = !room->visited;
+            // First time showing room description - uses description_shown flag
+            // which is set AFTER the description is displayed (not on room entry)
+            result = !room->description_shown;
             break;
 
         case COND_VISITED:
@@ -186,7 +186,7 @@ const char* world_get_room_description(World *world, Room *room) {
     if (!world || !room) return "";
 
     // Priority: item_used > has_item > room_has_item > first_visit/visited > default
-    // Higher priority conditions are checked first; first match wins
+    // Highest priority matching condition wins; ties broken by definition order
     const char *best_desc = NULL;
     int best_priority = -1;
 
@@ -222,6 +222,9 @@ const char* world_get_room_description(World *world, Room *room) {
             best_desc = cond->description;
         }
     }
+
+    // Mark that this room's description has been shown (for first_visit tracking)
+    room->description_shown = true;
 
     // Return best matching conditional description, or default
     return best_desc ? best_desc : room->description;

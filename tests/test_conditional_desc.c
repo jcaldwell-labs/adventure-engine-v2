@@ -94,15 +94,15 @@ void test_first_visit_condition(void) {
 
     world.current_room = room;
 
-    // Room not visited yet - should show first_visit description
-    r->visited = false;
+    // Room description not shown yet - should show first_visit description
+    r->description_shown = false;
     const char *desc = world_get_room_description(&world, r);
     ASSERT_STR_EQ("First time here!", desc, "should show first_visit description");
 
-    // After visiting - should show default
-    r->visited = true;
+    // After description shown - should show default (description_shown set by world_get_room_description)
+    // Note: world_get_room_description() sets description_shown = true, so we get default now
     desc = world_get_room_description(&world, r);
-    ASSERT_STR_EQ("Default description.", desc, "should show default after visiting");
+    ASSERT_STR_EQ("Default description.", desc, "should show default after first display");
 
     PASS();
 }
@@ -329,6 +329,48 @@ void test_condition_priority(void) {
     PASS();
 }
 
+// Test same-priority tie-breaking (first defined wins)
+void test_same_priority_tiebreaking(void) {
+    TEST("Same priority tie-breaking (first defined wins)");
+
+    World world;
+    world_init(&world);
+
+    int room = world_add_room(&world, "test", "Test Room", "Default.");
+    int lantern = world_add_item(&world, "lantern", "lantern", "A lantern.", true);
+    int torch = world_add_item(&world, "torch", "torch", "A torch.", true);
+    (void)torch;  // Suppress unused warning - torch exists but player won't have it
+
+    Room *r = &world.rooms[room];
+
+    // Add two has_item conditions with same priority (priority 3)
+    // First: has_item=lantern
+    r->conditional_descs[0].type = COND_HAS_ITEM;
+    r->conditional_descs[0].negate = false;
+    strncpy(r->conditional_descs[0].subject, "lantern", sizeof(r->conditional_descs[0].subject));
+    strncpy(r->conditional_descs[0].description, "Lantern desc (first).", sizeof(r->conditional_descs[0].description));
+
+    // Second: !has_item=torch (also priority 3, will match when player doesn't have torch)
+    r->conditional_descs[1].type = COND_HAS_ITEM;
+    r->conditional_descs[1].negate = true;
+    strncpy(r->conditional_descs[1].subject, "torch", sizeof(r->conditional_descs[1].subject));
+    strncpy(r->conditional_descs[1].description, "No torch desc (second).", sizeof(r->conditional_descs[1].description));
+
+    r->conditional_desc_count = 2;
+
+    world.current_room = room;
+    r->visited = true;
+    r->description_shown = true;  // Skip first_visit logic
+
+    // Player has lantern but not torch - both conditions match
+    // First one defined (lantern) should win due to tie-breaking
+    world.inventory[0] = lantern;
+    const char *desc = world_get_room_description(&world, r);
+    ASSERT_STR_EQ("Lantern desc (first).", desc, "first defined condition should win on tie");
+
+    PASS();
+}
+
 // Test loading conditional descriptions from file
 void test_load_conditional_descriptions(void) {
     TEST("Load conditional descriptions from file");
@@ -389,6 +431,7 @@ int main(void) {
     test_room_has_item_condition();
     test_item_used_condition();
     test_condition_priority();
+    test_same_priority_tiebreaking();
     test_load_conditional_descriptions();
 
     printf("\n=== Test Results ===\n");

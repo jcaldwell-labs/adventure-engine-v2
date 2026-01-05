@@ -557,6 +557,31 @@ bool world_load_from_file(World *world, const char *filename, LoadError *error) 
         }
     }
 
+    // Validate conditional description item references
+    for (int i = 0; i < world->room_count; i++) {
+        Room *room = &world->rooms[i];
+        for (int j = 0; j < room->conditional_desc_count; j++) {
+            ConditionalDesc *cond = &room->conditional_descs[j];
+            // Check item-based conditions have valid item IDs
+            if (cond->subject[0] != '\0') {
+                int item_idx = world_find_item(world, cond->subject);
+                if (item_idx == -1) {
+                    const char *cond_type = "unknown";
+                    switch (cond->type) {
+                        case COND_HAS_ITEM: cond_type = "has_item"; break;
+                        case COND_ROOM_HAS_ITEM: cond_type = "room_has_item"; break;
+                        case COND_ITEM_USED: cond_type = "item_used"; break;
+                        default: break;
+                    }
+                    fprintf(stderr, "Warning: Room '%s' has conditional description '%s%s=%s' "
+                            "referencing non-existent item '%s'\n",
+                            room->id, cond->negate ? "!" : "", cond_type, cond->subject,
+                            cond->subject);
+                }
+            }
+        }
+    }
+
     return true;
 }
 
