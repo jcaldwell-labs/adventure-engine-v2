@@ -11,6 +11,7 @@
 #define MAX_ITEMS 50
 #define MAX_ROOMS 50
 #define MAX_INVENTORY 20
+#define MAX_CONDITIONAL_DESCS 8  // Maximum conditional descriptions per room
 
 // Directions
 typedef enum {
@@ -23,6 +24,23 @@ typedef enum {
     DIR_COUNT
 } Direction;
 
+// Condition types for conditional room descriptions
+typedef enum {
+    COND_FIRST_VISIT,    // First time entering room
+    COND_VISITED,        // Returning to room (not first visit)
+    COND_HAS_ITEM,       // Player has item in inventory
+    COND_ROOM_HAS_ITEM,  // Item is present in this room
+    COND_ITEM_USED       // Has item ever been used? (for conditional descriptions)
+} ConditionType;
+
+// Conditional description (multiple can apply to a room)
+typedef struct {
+    ConditionType type;
+    char subject[32];      // Item ID for item-based conditions
+    bool negate;           // If true, condition is inverted (!has_item)
+    char description[512]; // Description to show when condition is met
+} ConditionalDesc;
+
 // Item definition
 typedef struct {
     char id[32];           // Unique identifier (e.g., "key", "sword")
@@ -33,6 +51,7 @@ typedef struct {
     // Issue #8: Use command support
     char use_message[256]; // Message shown when item is used (empty = not usable)
     bool use_consumable;   // Is item consumed after use?
+    bool used;             // Has this item been used? (for conditional descriptions)
 } Item;
 
 // Room definition
@@ -43,8 +62,12 @@ typedef struct {
     int exits[DIR_COUNT];     // Room IDs for each direction (-1 = no exit)
     int items[MAX_ITEMS];     // Item IDs in this room (-1 = empty slot)
     bool visited;             // Has player been here?
+    bool description_shown;   // Has room description been displayed? (for first_visit condition)
     char locked_exits[DIR_COUNT][32];  // Item ID required to unlock each direction (empty = unlocked)
     bool exit_unlocked[DIR_COUNT];     // Runtime state: has this exit been unlocked?
+    // Issue #6: Conditional descriptions
+    ConditionalDesc conditional_descs[MAX_CONDITIONAL_DESCS];
+    int conditional_desc_count;
 } Room;
 
 // Movement result codes (all non-negative for consistency)
@@ -87,6 +110,10 @@ int world_find_item(World *world, const char *id);
 
 // Get current room
 Room* world_current_room(World *world);
+
+// Get room description (evaluates conditional descriptions)
+// Returns the most specific matching description, or default if none match
+const char* world_get_room_description(World *world, Room *room);
 
 // Move to room in direction (returns true if successful)
 bool world_move(World *world, Direction dir);

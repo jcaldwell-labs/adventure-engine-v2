@@ -102,6 +102,67 @@ static bool parse_bool(const char *str) {
     return false;
 }
 
+// Helper: Parse conditional description key
+// Format: description_if(condition) where condition can be:
+//   first_visit, visited, has_item=item_id, !has_item=item_id,
+//   room_has_item=item_id, item_used=item_id
+// Note: Uses '=' separator to avoid conflict with property ':' separator
+// Returns true if successfully parsed, fills out the ConditionalDesc
+static bool parse_cond_desc_key(const char *key, ConditionalDesc *cond) {
+    // Check if key starts with "description_if("
+    if (strncmp(key, "description_if(", 15) != 0) {
+        return false;
+    }
+
+    const char *cond_start = key + 15;
+    const char *cond_end = strchr(cond_start, ')');
+    if (!cond_end) {
+        return false;
+    }
+
+    // Extract condition string
+    char condition[64];
+    size_t cond_len = cond_end - cond_start;
+    if (cond_len >= sizeof(condition)) {
+        cond_len = sizeof(condition) - 1;
+    }
+    strncpy(condition, cond_start, cond_len);
+    condition[cond_len] = '\0';
+
+    // Check for negation
+    cond->negate = false;
+    char *cond_str = condition;
+    if (cond_str[0] == '!') {
+        cond->negate = true;
+        cond_str++;
+    }
+
+    // Parse condition type (use '=' as separator for item conditions)
+    cond->subject[0] = '\0';
+
+    if (strcmp(cond_str, "first_visit") == 0) {
+        cond->type = COND_FIRST_VISIT;
+    } else if (strcmp(cond_str, "visited") == 0) {
+        cond->type = COND_VISITED;
+    } else if (strncmp(cond_str, "has_item=", 9) == 0) {
+        cond->type = COND_HAS_ITEM;
+        strncpy(cond->subject, cond_str + 9, sizeof(cond->subject) - 1);
+        cond->subject[sizeof(cond->subject) - 1] = '\0';
+    } else if (strncmp(cond_str, "room_has_item=", 14) == 0) {
+        cond->type = COND_ROOM_HAS_ITEM;
+        strncpy(cond->subject, cond_str + 14, sizeof(cond->subject) - 1);
+        cond->subject[sizeof(cond->subject) - 1] = '\0';
+    } else if (strncmp(cond_str, "item_used=", 10) == 0) {
+        cond->type = COND_ITEM_USED;
+        strncpy(cond->subject, cond_str + 10, sizeof(cond->subject) - 1);
+        cond->subject[sizeof(cond->subject) - 1] = '\0';
+    } else {
+        return false;  // Unknown condition type
+    }
+
+    return true;
+}
+
 // Helper: Apply use command properties to an item
 // Note: use_consumable is only valid when use_message is provided
 static void apply_use_properties(Item *item, const char *use_message, bool use_consumable) {
@@ -216,6 +277,9 @@ bool world_load_from_file(World *world, const char *filename, LoadError *error) 
     // Issue #8: Use command properties
     char prop_use_message[256] = "";
     bool prop_use_consumable = false;
+    // Issue #6: Conditional descriptions
+    ConditionalDesc prop_cond_descs[MAX_CONDITIONAL_DESCS];
+    int prop_cond_desc_count = 0;
 
     char world_name[64] = "Untitled";
     char world_start[32] = "";
@@ -255,6 +319,13 @@ bool world_load_from_file(World *world, const char *filename, LoadError *error) 
                              "Failed to add room '%s' (too many rooms?)", current_id);
                     fclose(file);
                     return false;
+                }
+
+                // Copy conditional descriptions
+                Room *room = &world->rooms[room_idx];
+                room->conditional_desc_count = prop_cond_desc_count;
+                for (int i = 0; i < prop_cond_desc_count; i++) {
+                    room->conditional_descs[i] = prop_cond_descs[i];
                 }
 
                 // Parse exits if present
@@ -322,6 +393,7 @@ bool world_load_from_file(World *world, const char *filename, LoadError *error) 
             prop_takeable = false;
             prop_use_message[0] = '\0';
             prop_use_consumable = false;
+            prop_cond_desc_count = 0;
 
             continue;
         }
@@ -361,6 +433,22 @@ bool world_load_from_file(World *world, const char *filename, LoadError *error) 
             } else if (strcmp(key, "locked_exits") == 0) {
                 strncpy(prop_locked_exits, value, sizeof(prop_locked_exits) - 1);
                 prop_locked_exits[sizeof(prop_locked_exits) - 1] = '\0';
+            } else if (strncmp(key, "description_if(", 15) == 0) {
+                // Issue #6: Parse conditional description
+                if (prop_cond_desc_count < MAX_CONDITIONAL_DESCS) {
+                    ConditionalDesc *cond = &prop_cond_descs[prop_cond_desc_count];
+                    if (parse_cond_desc_key(key, cond)) {
+                        strncpy(cond->description, value, sizeof(cond->description) - 1);
+                        cond->description[sizeof(cond->description) - 1] = '\0';
+                        prop_cond_desc_count++;
+                    } else {
+                        fprintf(stderr, "Warning: Invalid conditional description '%s' in room '%s'\n",
+                                key, current_id);
+                    }
+                } else {
+                    fprintf(stderr, "Warning: Too many conditional descriptions in room '%s'\n",
+                            current_id);
+                }
             }
         } else if (strcmp(current_section, "ITEM") == 0) {
             if (strcmp(key, "name") == 0) {
@@ -396,6 +484,13 @@ bool world_load_from_file(World *world, const char *filename, LoadError *error) 
 
         int room_idx = world_add_room(world, current_id, prop_name, prop_description);
         if (room_idx != -1) {
+            // Copy conditional descriptions
+            Room *room = &world->rooms[room_idx];
+            room->conditional_desc_count = prop_cond_desc_count;
+            for (int i = 0; i < prop_cond_desc_count; i++) {
+                room->conditional_descs[i] = prop_cond_descs[i];
+            }
+
             if (prop_exits[0] != '\0') {
                 parse_exits(world, room_idx, prop_exits);
             }
@@ -457,6 +552,31 @@ bool world_load_from_file(World *world, const char *filename, LoadError *error) 
                     fprintf(stderr, "Warning: Room '%s' has locked exit '%s' requiring non-existent key '%s'\n",
                             world->rooms[i].id, direction_to_str((Direction)dir),
                             world->rooms[i].locked_exits[dir]);
+                }
+            }
+        }
+    }
+
+    // Validate conditional description item references
+    for (int i = 0; i < world->room_count; i++) {
+        Room *room = &world->rooms[i];
+        for (int j = 0; j < room->conditional_desc_count; j++) {
+            ConditionalDesc *cond = &room->conditional_descs[j];
+            // Check item-based conditions have valid item IDs
+            if (cond->subject[0] != '\0') {
+                int item_idx = world_find_item(world, cond->subject);
+                if (item_idx == -1) {
+                    const char *cond_type = "unknown";
+                    switch (cond->type) {
+                        case COND_HAS_ITEM: cond_type = "has_item"; break;
+                        case COND_ROOM_HAS_ITEM: cond_type = "room_has_item"; break;
+                        case COND_ITEM_USED: cond_type = "item_used"; break;
+                        default: break;
+                    }
+                    fprintf(stderr, "Warning: Room '%s' has conditional description '%s%s=%s' "
+                            "referencing non-existent item '%s'\n",
+                            room->id, cond->negate ? "!" : "", cond_type, cond->subject,
+                            cond->subject);
                 }
             }
         }

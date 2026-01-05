@@ -1,6 +1,6 @@
 # Adventure Engine World File Format
 
-Version 1.1
+Version 1.2
 
 ## Overview
 
@@ -68,11 +68,23 @@ Defines a room. Can appear multiple times.
 - `description` - Full room description (required, max 512 chars)
 - `exits` - Comma-separated list of direction=room_id pairs (optional)
 - `locked_exits` - Comma-separated list of direction=item_id pairs for locked doors (optional)
+- `description_if(condition)` - Conditional descriptions based on game state (optional, max 8 per room)
 
 **Directions:** north, south, east, west, up, down
 
 **Locked Exits:**
 When a direction is listed in `locked_exits`, the player must have the specified item in their inventory to pass through. The door auto-unlocks when the player has the key and attempts to move through, and stays unlocked for the rest of the game.
+
+**Conditional Descriptions:**
+Rooms can have multiple conditional descriptions that display based on game state. When a condition matches, its description replaces the default. Conditions are evaluated in priority order:
+
+1. `item_used=item_id` - Highest priority. Shows when the specified item has been used.
+2. `has_item=item_id` - Shows when player has item in inventory.
+3. `room_has_item=item_id` - Shows when item is present in this room.
+4. `first_visit` - Shows only on first visit (room not yet marked as visited).
+5. `visited` - Shows on return visits (room has been visited before).
+
+Conditions can be negated with `!` prefix (e.g., `!has_item=lantern`).
 
 **Example:**
 
@@ -84,12 +96,27 @@ exits: north=hall
 
 [ROOM:hall]
 name: Grand Hall
-description: A vast hall with high vaulted ceilings. Torches flicker on the walls, casting dancing shadows.
+description: A vast hall with high vaulted ceilings. Torches flicker on the walls.
 exits: south=entrance, east=chamber, up=tower_top
 locked_exits: east=chamber_key
+
+[ROOM:cellar]
+name: Dark Cellar
+description: A damp, dark cellar. You can barely see anything.
+description_if(first_visit): You descend into the cellar for the first time. The darkness is oppressive.
+description_if(visited): The familiar musty smell greets your return.
+description_if(has_item=lantern): Your lantern illuminates dusty wine racks and cobwebs.
+description_if(!has_item=lantern): It's quite dim here without a light source.
+description_if(room_has_item=coin): Something glints on the floor.
+exits: up=hall
 ```
 
-In this example, the east exit to the chamber is locked and requires the `chamber_key` item to unlock.
+In the example above:
+
+- First visit shows the special "first time" description
+- Return visits show "familiar musty smell" unless the player has the lantern
+- Having the lantern overrides the visit-based descriptions
+- If a coin is in the room, that description takes priority over visit-based ones
 
 #### [ITEM:id] Section
 
@@ -233,9 +260,9 @@ Planned features for future versions:
 - **NPCs**: Character definitions with dialogue
 - ~~**Locked Exits**: Doors requiring keys or conditions~~ (Implemented in v1.1)
 - ~~**Item Usage**: Scripts for item interactions~~ (Implemented in v1.1)
+- ~~**Conditional Descriptions**: Room descriptions that change based on state~~ (Implemented in v1.2)
 - **Triggers**: Events that change world state
 - **Variables**: Global and local state tracking
-- **Conditional Descriptions**: Room descriptions that change based on state
 
 ## Best Practices
 

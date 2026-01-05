@@ -1,0 +1,53 @@
+# Conditional Descriptions Test World
+# Issue #6: Tests all conditional description types
+
+[WORLD]
+name: Conditional Test
+start: cellar
+
+[ROOM:cellar]
+name: Dark Cellar
+description: A damp, dark cellar. You can barely see anything.
+description_if(first_visit): You descend into the cellar for the first time. The darkness is oppressive.
+description_if(visited): The familiar musty smell of the cellar greets your return.
+description_if(has_item=lantern): Your lantern illuminates dusty wine racks and cobwebs. Much better!
+description_if(room_has_item=old_coin): Something glints on the floor near the wine rack.
+exits: north=hallway
+
+[ROOM:hallway]
+name: Long Hallway
+description: A narrow stone hallway stretches before you.
+description_if(first_visit): You step into the hallway. Your footsteps echo off the walls.
+description_if(!has_item=lantern): It's quite dim here without a light source.
+description_if(has_item=lantern): The lantern reveals ancient tapestries lining the walls.
+exits: south=cellar, east=study
+
+[ROOM:study]
+name: Dusty Study
+description: An old study filled with books and papers.
+description_if(item_used=magic_scroll): The study feels different now. Arcane symbols glow faintly on the walls where the scroll was read.
+description_if(room_has_item=magic_scroll): A peculiar scroll rests on the desk, radiating faint energy.
+description_if(first_visit): Dust motes dance in the air as you enter. No one has been here in ages.
+exits: west=hallway
+
+[ITEM:lantern]
+name: brass lantern
+description: A sturdy brass lantern that provides warm light.
+takeable: yes
+location: cellar
+use_message: You hold the lantern high, casting warm light around you.
+use_consumable: no
+
+[ITEM:old_coin]
+name: ancient coin
+description: A tarnished coin with strange markings.
+takeable: yes
+location: cellar
+
+[ITEM:magic_scroll]
+name: magic scroll
+description: A scroll covered in mysterious glowing runes.
+takeable: yes
+location: study
+use_message: You read the scroll aloud. Ancient words of power echo through the room, and the parchment crumbles to ash.
+use_consumable: yes
