@@ -45,6 +45,7 @@ TEST_PATH_TRAVERSAL = $(BUILD_DIR)/test_path_traversal
 TEST_SECURITY = $(BUILD_DIR)/test_security
 TEST_LOCKED_EXITS = $(BUILD_DIR)/test_locked_exits
 TEST_USE_COMMAND = $(BUILD_DIR)/test_use_command
+TEST_CONDITIONAL_DESC = $(BUILD_DIR)/test_conditional_desc
 
 .PHONY: all clean lib engine multiplayer test tests run run-test run-coordinator run-tests debug
 
@@ -66,7 +67,7 @@ $(LIB_OBJ): $(LIB_SRC) $(INCLUDE_DIR)/smartterm_simple.h | $(BUILD_DIR)
 # Build test programs
 test: tests
 
-tests: $(TEST_PARSER) $(TEST_WORLD) $(TEST_SAVE_LOAD) $(TEST_PATH_TRAVERSAL) $(TEST_SECURITY) $(TEST_LOCKED_EXITS) $(TEST_USE_COMMAND)
+tests: $(TEST_PARSER) $(TEST_WORLD) $(TEST_SAVE_LOAD) $(TEST_PATH_TRAVERSAL) $(TEST_SECURITY) $(TEST_LOCKED_EXITS) $(TEST_USE_COMMAND) $(TEST_CONDITIONAL_DESC)
 
 # Parser tests
 $(TEST_PARSER): $(TEST_DIR)/test_parser.c $(BUILD_DIR)/parser.o | $(BUILD_DIR)
@@ -94,6 +95,10 @@ $(TEST_LOCKED_EXITS): $(TEST_DIR)/test_locked_exits.c $(BUILD_DIR)/world.o | $(B
 
 # Use command tests (Issue #8)
 $(TEST_USE_COMMAND): $(TEST_DIR)/test_use_command.c $(BUILD_DIR)/world.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+
+# Conditional description tests (Issue #6)
+$(TEST_CONDITIONAL_DESC): $(TEST_DIR)/test_conditional_desc.c $(BUILD_DIR)/world.o $(BUILD_DIR)/world_loader.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
 # Build adventure engine
@@ -136,6 +141,9 @@ run-test: tests
 	@echo ""
 	@echo "Running Use Command Tests (Issue #8)..."
 	@$(TEST_USE_COMMAND) || true
+	@echo ""
+	@echo "Running Conditional Description Tests (Issue #6)..."
+	@$(TEST_CONDITIONAL_DESC) || true
 
 run-tests: run-test
 

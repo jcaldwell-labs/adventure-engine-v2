@@ -42,6 +42,7 @@ int world_add_room(World *world, const char *id, const char *name, const char *d
     strncpy(room->name, name, sizeof(room->name) - 1);
     strncpy(room->description, desc, sizeof(room->description) - 1);
     room->visited = false;
+    room->conditional_desc_count = 0;
 
     // Initialize exits and locked exits
     for (int i = 0; i < DIR_COUNT; i++) {
@@ -72,6 +73,7 @@ int world_add_item(World *world, const char *id, const char *name, const char *d
     // Issue #8: Initialize use command fields
     item->use_message[0] = '\0';
     item->use_consumable = false;
+    item->used = false;
 
     return idx;
 }
@@ -122,6 +124,107 @@ Room* world_current_room(World *world) {
         return NULL;
     }
     return &world->rooms[world->current_room];
+}
+
+// Helper: Check if item is in the given room
+static bool room_has_item(World *world, Room *room, const char *item_id) {
+    for (int i = 0; i < MAX_ITEMS; i++) {
+        if (room->items[i] != -1) {
+            Item *item = &world->items[room->items[i]];
+            if (strcmp(item->id, item_id) == 0) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+// Helper: Check if item has been used
+static bool item_was_used(World *world, const char *item_id) {
+    int idx = world_find_item(world, item_id);
+    if (idx >= 0) {
+        return world->items[idx].used;
+    }
+    return false;
+}
+
+// Helper: Evaluate a single condition
+static bool evaluate_condition(World *world, Room *room, ConditionalDesc *cond) {
+    bool result = false;
+
+    switch (cond->type) {
+        case COND_FIRST_VISIT:
+            // First visit means room has NOT been visited before this entry
+            // Note: visited is set to true when entering, so we check if this
+            // is the first time (visited was false before entering)
+            result = !room->visited;
+            break;
+
+        case COND_VISITED:
+            // Has been visited before (return visit)
+            result = room->visited;
+            break;
+
+        case COND_HAS_ITEM:
+            result = world_has_item(world, cond->subject);
+            break;
+
+        case COND_ROOM_HAS_ITEM:
+            result = room_has_item(world, room, cond->subject);
+            break;
+
+        case COND_ITEM_USED:
+            result = item_was_used(world, cond->subject);
+            break;
+    }
+
+    // Apply negation if specified
+    return cond->negate ? !result : result;
+}
+
+const char* world_get_room_description(World *world, Room *room) {
+    if (!world || !room) return "";
+
+    // Priority: item_used > has_item > room_has_item > first_visit/visited > default
+    // Higher priority conditions are checked first; first match wins
+    const char *best_desc = NULL;
+    int best_priority = -1;
+
+    for (int i = 0; i < room->conditional_desc_count; i++) {
+        ConditionalDesc *cond = &room->conditional_descs[i];
+
+        if (!evaluate_condition(world, room, cond)) {
+            continue;
+        }
+
+        // Assign priority based on condition type
+        int priority;
+        switch (cond->type) {
+            case COND_ITEM_USED:
+                priority = 4;
+                break;
+            case COND_HAS_ITEM:
+                priority = 3;
+                break;
+            case COND_ROOM_HAS_ITEM:
+                priority = 2;
+                break;
+            case COND_FIRST_VISIT:
+            case COND_VISITED:
+                priority = 1;
+                break;
+            default:
+                priority = 0;
+        }
+
+        if (priority > best_priority) {
+            best_priority = priority;
+            best_desc = cond->description;
+        }
+    }
+
+    // Return best matching conditional description, or default
+    return best_desc ? best_desc : room->description;
 }
 
 bool world_move(World *world, Direction dir) {

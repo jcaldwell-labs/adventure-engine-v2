@@ -326,7 +326,7 @@ void cmd_look(World *world) {
 
     st_add_output("", ST_CTX_NORMAL);
     st_add_output(room->name, ST_CTX_SPECIAL);
-    st_add_output(room->description, ST_CTX_NORMAL);
+    st_add_output(world_get_room_description(world, room), ST_CTX_NORMAL);
 
     // Show exits
     char exits_buf[256];
@@ -574,6 +574,9 @@ void cmd_use(World *world, const char *item_id) {
         st_add_output(buf, ST_CTX_NORMAL);
         return;
     }
+
+    // Mark item as used (for conditional descriptions)
+    item->used = true;
 
     // Display use message
     st_add_output("", ST_CTX_NORMAL);
