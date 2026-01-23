@@ -45,7 +45,9 @@ adventure-engine-v2/
 ├── tests/            # Test suite
 │   ├── test_parser.c       # Parser tests (7/8 passing)
 │   ├── test_world.c        # World tests (11/11 passing)
-│   └── test_save_load.c    # Save/load tests (5/7 passing)
+│   ├── test_save_load.c    # Save/load tests (7/7 passing)
+│   ├── test_locked_exits.c # Locked exits tests (8/8 passing)
+│   └── test_use_command.c  # Use command tests (8/8 passing)
 ├── docs/             # Comprehensive documentation
 ├── Makefile          # Build system
 └── README.md         # User-facing documentation
@@ -76,8 +78,7 @@ adventure-engine-v2/
 **Save/Load** (`save_load.{h,c}`):
 - Game state persistence to ~/.adventure-saves/
 - Multiple save slots
-- Stores: room position, inventory, item locations, world name
-- NOTE: Does not persist visited room state (known limitation)
+- Stores: room position, inventory, item locations, world name, visited rooms
 
 **Terminal UI** (`lib/smartterm_simple.{h,c}`):
 - Scrolling output buffer
@@ -147,7 +148,10 @@ make run-tests
 
 - Parser: 7/8 passing (tab handling is expected behavior)
 - World: 11/11 passing ✓
-- Save/Load: 5/7 passing (visited rooms not persisted - known limitation)
+- Save/Load: 7/7 passing ✓
+- Security: 16/16 passing ✓
+- Locked Exits: 8/8 passing ✓
+- Use Command: 8/8 passing ✓
 
 ## Development Guidelines
 
@@ -240,11 +244,9 @@ make V=1 all
 
 ## Known Limitations
 
-1. **Visited room state not persisted** in saves
-2. **Multiplayer not integrated** with game engine (infrastructure exists)
-3. **Tab characters in commands** not split by parser (use spaces)
-4. **No NPC dialogue system** (world files are static)
-5. **No puzzle mechanics** (keys, locks, conditional exits not implemented)
+1. **Multiplayer not integrated** with game engine (infrastructure exists)
+2. **Tab characters in commands** not split by parser (use spaces)
+3. **No NPC dialogue system** (world files are static)
 
 ## Documentation
 
@@ -324,4 +326,4 @@ Quick checklist:
 
 ---
 
-*This document is designed to help AI assistants (like Claude) quickly understand and work with this codebase. Last updated: Nov 23, 2025 (Phase 2)*
+*This document is designed to help AI assistants (like Claude) quickly understand and work with this codebase. Last updated: Jan 23, 2026*
