@@ -5,7 +5,7 @@
 See: .planning/PROJECT.md (updated 2026-02-05)
 
 **Core value:** World format expressive enough to create any classic text adventure without engine code changes
-**Current focus:** Phase 0 - Close Open Work (complete)
+**Current focus:** Phase 1 - State Management (next)
 
 ## Current Position
 
@@ -59,4 +59,4 @@ None.
 
 Last session: 2026-02-05 15:28 UTC
 Stopped at: Completed 00-01-PLAN.md, Phase 0 complete
-Resume file: None - ready for Phase 1 planning with /gsd:plan-phase 1
+Resume file: None - ready for Phase 1 with /gsd:discuss-phase 1 or /gsd:plan-phase 1
