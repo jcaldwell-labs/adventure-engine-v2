@@ -48,7 +48,7 @@ static int tests_failed = 0;
 #define ASSERT_EQ(expected, actual, msg) \
     do { \
         if ((expected) != (actual)) { \
-            char err[256]; \
+            char err[512]; \
             snprintf(err, sizeof(err), "%s (expected: %d, got: %d)", msg, expected, actual); \
             FAIL(err); \
             return; \
@@ -58,8 +58,8 @@ static int tests_failed = 0;
 #define ASSERT_STR_EQ(expected, actual, msg) \
     do { \
         if (strcmp(expected, actual) != 0) { \
-            char err[256]; \
-            snprintf(err, sizeof(err), "%s (expected: '%s', got: '%s')", msg, expected, actual); \
+            char err[512]; \
+            snprintf(err, sizeof(err), "%s (expected: '%.128s', got: '%.128s')", msg, expected, actual); \
             FAIL(err); \
             return; \
         } \
