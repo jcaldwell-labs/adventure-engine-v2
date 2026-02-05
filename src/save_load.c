@@ -15,7 +15,7 @@
 #include "save_load.h"
 
 #define SAVE_DIR_NAME ".adventure-saves"
-#define SAVE_VERSION 2  // v2 adds exit_unlocked state
+#define SAVE_VERSION 3  // v3 adds description_shown and item used states
 
 // Get the save directory path
 static void get_save_dir(char *buffer, size_t buffer_size) {
@@ -161,6 +161,20 @@ bool game_save(const World *world, const char *slot_name, const char *world_name
         }
         fprintf(file, "\n");
     }
+    fprintf(file, "\n");
+
+    // Write description_shown states (v3+)
+    fprintf(file, "[DESCRIPTION_SHOWN]\n");
+    for (int i = 0; i < world->room_count; i++) {
+        fprintf(file, "%d\n", world->rooms[i].description_shown ? 1 : 0);
+    }
+    fprintf(file, "\n");
+
+    // Write item used states (v3+)
+    fprintf(file, "[ITEMS_USED]\n");
+    for (int i = 0; i < world->item_count; i++) {
+        fprintf(file, "%d\n", world->items[i].used ? 1 : 0);
+    }
 
     fclose(file);
     return true;
@@ -196,10 +210,15 @@ bool game_load(World *world, const char *slot_name, char *world_name, size_t wor
     // Temporary storage for unlocked exits (v2+)
     bool unlocked_exits[MAX_ROOMS][DIR_COUNT];
 
+    // Temporary storage for v3+ features
+    bool description_shown[MAX_ROOMS];
+    bool items_used[MAX_ITEMS];
+
     // Initialize
     for (int i = 0; i < MAX_INVENTORY; i++) inventory[i] = -1;
     for (int i = 0; i < MAX_ROOMS; i++) {
         visited[i] = 0;
+        description_shown[i] = false;
         for (int j = 0; j < MAX_ITEMS; j++) {
             room_items[i][j] = -1;
         }
@@ -207,9 +226,14 @@ bool game_load(World *world, const char *slot_name, char *world_name, size_t wor
             unlocked_exits[i][j] = false;
         }
     }
+    for (int i = 0; i < MAX_ITEMS; i++) {
+        items_used[i] = false;
+    }
 
     int inv_idx = 0;
     int visited_idx = 0;
+    int desc_shown_idx = 0;
+    int items_used_idx = 0;
 
     while (fgets(line, sizeof(line), file)) {
         // Remove newline
@@ -314,6 +338,20 @@ bool game_load(World *world, const char *slot_name, char *world_name, size_t wor
                     }
                 }
             }
+        } else if (strcmp(section, "DESCRIPTION_SHOWN") == 0) {
+            int shown;
+            if (sscanf(line, "%d", &shown) == 1) {
+                if (desc_shown_idx < MAX_ROOMS) {
+                    description_shown[desc_shown_idx++] = (shown != 0);
+                }
+            }
+        } else if (strcmp(section, "ITEMS_USED") == 0) {
+            int used;
+            if (sscanf(line, "%d", &used) == 1) {
+                if (items_used_idx < MAX_ITEMS) {
+                    items_used[items_used_idx++] = (used != 0);
+                }
+            }
         }
     }
 
@@ -357,6 +395,20 @@ bool game_load(World *world, const char *slot_name, char *world_name, size_t wor
         for (int j = 0; j < DIR_COUNT; j++) {
             world->rooms[i].exit_unlocked[j] = unlocked_exits[i][j];
         }
+    }
+
+    // Apply description_shown states (v3+)
+    for (int i = 0; i < rooms_to_apply; i++) {
+        world->rooms[i].description_shown = description_shown[i];
+    }
+
+    // Apply item used states (v3+)
+    int items_to_apply = world->item_count > 0 ? world->item_count : item_count;
+    if (item_count < items_to_apply) items_to_apply = item_count;
+    if (items_to_apply > MAX_ITEMS) items_to_apply = MAX_ITEMS;
+
+    for (int i = 0; i < items_to_apply; i++) {
+        world->items[i].used = items_used[i];
     }
 
     return true;
